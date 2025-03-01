@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+<<<<<<< HEAD
 	"fmt"
 	"log"
 	"net"
 	"os"
 
 	pb "github.com/dead-letter/dead-letter-manifests/pb"
+
 	"github.com/jackc/pgx/v5"
 	"google.golang.org/grpc"
 )
@@ -43,6 +45,7 @@ func main() {
 	}
 	defer conn.Close(context.Background())
 
+
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
@@ -50,5 +53,6 @@ func main() {
 
 	grpcServer := grpc.NewServer()
 	pb.RegisterDataServiceServer(grpcServer, newServer(conn))
+
 	grpcServer.Serve(lis)
 }
