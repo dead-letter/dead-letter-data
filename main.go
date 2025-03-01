@@ -2,13 +2,12 @@ package main
 
 import (
 	"context"
-<<<<<<< HEAD
 	"fmt"
 	"log"
 	"net"
 	"os"
 
-	pb "github.com/dead-letter/dead-letter-manifests/pb"
+	pb "github.com/dead-letter/dead-letter-data/pb"
 
 	"github.com/jackc/pgx/v5"
 	"google.golang.org/grpc"
@@ -44,7 +43,6 @@ func main() {
 		log.Fatalf("Unable to connect to database: %v\n", err)
 	}
 	defer conn.Close(context.Background())
-
 
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
