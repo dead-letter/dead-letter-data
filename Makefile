@@ -1,5 +1,5 @@
-PROTO_DIR=../dead-letter-manifests/protos
-PB_OUT_DIR=./pb
+PB_DIR_IN=../dead-letter-manifests/protos
+PB_DIR_OUT=./internal/pb
 PROTOC=$(shell which protoc)
 
 ## help: print this help message
@@ -24,38 +24,36 @@ audit:
 	go test -race -vet=off ./...
 
 
-.PHONY: pb/check
-pb/check:
+# proto/check: check for necessary build tools and directories
+.PHONY: proto/check
+proto/check:
 	@which protoc > /dev/null || { echo "❌ protoc not found"; exit 1; }
 	@which protoc-gen-go > /dev/null || { echo "❌ protoc-gen-go not found"; exit 1; }
 	@which protoc-gen-go-grpc > /dev/null || { echo "❌ protoc-gen-go-grpc not found"; exit 1; }
+	@[ -d "$(PB_DIR_IN)" ] || { echo "❌ PB_DIR_IN $(PB_DIR_IN) does not exist"; exit 1; }
 
 
-.PHONY: pb/data
-pb/data: pb/check
-	@mkdir -p $(PB_OUT_DIR)
-	@$(PROTOC) -I $(PROTO_DIR) \
-			--go_out=$(PB_OUT_DIR) --go_opt=paths=source_relative \
-	        --go-grpc_out=$(PB_OUT_DIR) --go-grpc_opt=paths=source_relative \
-	        $(PROTO_DIR)/data.proto
+## proto/gen: generate protoc stubs
+.PHONY: proto/gen
+proto/gen: proto/check
+	@mkdir -p $(PB_DIR_OUT)
+	@$(PROTOC) -I $(PB_DIR_IN) \
+			--go_out=$(PB_DIR_OUT) --go_opt=paths=source_relative \
+	        --go-grpc_out=$(PB_DIR_OUT) --go-grpc_opt=paths=source_relative \
+	        $(PB_DIR_IN)/data.proto
 	@echo "✅ Generated gRPC code for data.proto"
 
 
-.PHONY: pb/clean
-pb/clean:
-	@rm -f $(PB_OUT_DIR)/*.pb.go
+## proto/clean: clean generated files
+.PHONY: proto/clean
+proto/clean:
+	@rm -f $(PB_DIR_OUT)/*.pb.go
 	@echo "🗑️  Cleaned generated files"
 
 
-## db/psql: connect to the database using psql
-.PHONY: db/psql
-db/psql:
-	psql ${DATABASE_URL}
-
-
-## db/migrations/new label=$1: create a new database migration
-.PHONY: db/migrations/new
-db/migrations/new:
+## migrations/new label=$1: create a new database migration
+.PHONY: migrations/new
+migrations/new:
 	@echo "Creating migration files for ${label}..."
 	go tool goose create ${label} sql
 

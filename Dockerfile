@@ -8,6 +8,6 @@ RUN go mod download
 
 COPY . ./
 
-RUN go build -ldflags "-w -s" -o main
+RUN go build -ldflags "-w -s" -o main ./cmd/data
 
 ENTRYPOINT ["/app/main"]

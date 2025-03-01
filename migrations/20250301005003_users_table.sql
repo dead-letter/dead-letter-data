@@ -10,11 +10,8 @@ CREATE TABLE IF NOT EXISTS user_ (
     version_ integer NOT NULL DEFAULT 1
 );
 
-INSERT INTO user_ (email_, password_hash_) 
-SELECT 'test@example.com', crypt('super_secure_password', gen_salt('bf'))
-WHERE NOT EXISTS (
-    SELECT 1 FROM user_ WHERE email_ = 'test@example.com'
-);
+INSERT INTO user_ (email_, password_hash_) VALUES
+	('test@example.com', crypt('password', gen_salt('bf')))
 -- +goose StatementEnd
 
 -- +goose Down
