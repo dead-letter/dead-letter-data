@@ -8,8 +8,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/dead-letter/dead-letter-data/internal/data"
 	"github.com/dead-letter/dead-letter-data/internal/pb"
+	"github.com/dead-letter/dead-letter-data/internal/server"
 	"github.com/dead-letter/dead-letter-data/migrations"
 	pgxuuid "github.com/jackc/pgx-gofrs-uuid"
 	"github.com/jackc/pgx/v5"
@@ -37,9 +37,7 @@ func main() {
 	defer pool.Close()
 
 	// Create server
-	srv := &server{
-		models: data.New(pool),
-	}
+	srv := server.New(pool)
 
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {

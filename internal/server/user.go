@@ -1,20 +1,14 @@
-package main
+package server
 
 import (
 	"context"
 
-	"github.com/dead-letter/dead-letter-data/internal/data"
 	"github.com/dead-letter/dead-letter-data/internal/pb"
 	"github.com/gofrs/uuid/v5"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-type server struct {
-	pb.UnimplementedDataServiceServer
-	models data.Models
-}
-
-func (srv *server) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.UserResponse, error) {
+func (srv *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.UserResponse, error) {
 	u, err := srv.models.User.New(req.Email, req.Password)
 	if err != nil {
 		return nil, err
@@ -27,7 +21,7 @@ func (srv *server) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*
 	return res, nil
 }
 
-func (srv *server) GetUserByEmail(ctx context.Context, req *pb.GetUserByEmailRequest) (*pb.UserResponse, error) {
+func (srv *Server) GetUserByEmail(ctx context.Context, req *pb.GetUserByEmailRequest) (*pb.UserResponse, error) {
 	u, err := srv.models.User.GetWithEmail(req.Email)
 	if err != nil {
 		return nil, err
@@ -40,7 +34,7 @@ func (srv *server) GetUserByEmail(ctx context.Context, req *pb.GetUserByEmailReq
 	return res, nil
 }
 
-func (srv *server) AuthenticateUser(ctx context.Context, req *pb.AuthenticateUserRequest) (*pb.UserResponse, error) {
+func (srv *Server) AuthenticateUser(ctx context.Context, req *pb.AuthenticateUserRequest) (*pb.UserResponse, error) {
 	u, err := srv.models.User.GetForCredentials(req.Email, req.Password)
 	if err != nil {
 		return nil, err
@@ -53,7 +47,7 @@ func (srv *server) AuthenticateUser(ctx context.Context, req *pb.AuthenticateUse
 	return res, nil
 }
 
-func (srv *server) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UserResponse, error) {
+func (srv *Server) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UserResponse, error) {
 	u, err := srv.models.User.FromProto(req)
 	if err != nil {
 		return nil, err
@@ -71,7 +65,7 @@ func (srv *server) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*
 	return res, nil
 }
 
-func (srv *server) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest) (*emptypb.Empty, error) {
+func (srv *Server) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest) (*emptypb.Empty, error) {
 	userID, err := uuid.FromString(req.Id)
 	if err != nil {
 		return nil, err
