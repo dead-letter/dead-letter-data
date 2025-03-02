@@ -6,12 +6,14 @@ import (
 	"time"
 
 	"github.com/alexedwards/argon2id"
+	"github.com/dead-letter/dead-letter-data/internal/pb"
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type UserModel struct {
@@ -19,14 +21,22 @@ type UserModel struct {
 }
 
 type User struct {
-	ID           uuid.UUID `json:"-"`
-	CreatedAt    time.Time `json:"created_at"`
-	Email        string    `json:"email"`
-	PasswordHash []byte    `json:"-"`
-	Version      int       `json:"-"`
+	ID           uuid.UUID
+	CreatedAt    time.Time
+	Email        string
+	PasswordHash []byte
+	Version      int
 }
 
-func (u User) Validate() error {
+func (u *User) Proto() *pb.User {
+	return &pb.User{
+		Id:        u.ID.String(),
+		CreatedAt: timestamppb.New(u.CreatedAt),
+		Email:     u.Email,
+	}
+}
+
+func (u *User) Validate() error {
 	return validation.ValidateStruct(&u,
 		validation.Field(&u.Email, validation.Required, is.Email),
 		validation.Field(&u.PasswordHash, validation.Required))
@@ -41,6 +51,22 @@ func (u *User) SetPasswordHash(password string) error {
 	u.PasswordHash = []byte(hash)
 
 	return nil
+}
+
+func (m UserModel) FromProto(req *pb.UpdateUserRequest) (*User, error) {
+	id, err := uuid.FromString(req.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	u := &User{
+		ID:           id,
+		Email:        req.Email,
+		PasswordHash: []byte(req.PasswordHash),
+		Version:      int(req.Version),
+	}
+
+	return u, nil
 }
 
 func (m UserModel) New(email, password string) (*User, error) {
@@ -165,7 +191,7 @@ func (m UserModel) Update(user *User) error {
 		UPDATE user_ 
         SET email_ = $1, password_hash_ = $2, version_ = version_ + 1
         WHERE id_ = $3 AND version_ = $4
-        RETURNING version_`
+        RETURNING version_;`
 
 	args := []any{
 		user.Email,
@@ -187,6 +213,26 @@ func (m UserModel) Update(user *User) error {
 		default:
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (m UserModel) Delete(userID uuid.UUID) error {
+	sql := `
+		DELETE FROM user_
+		WHERE id_ = $1;`
+
+	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
+	defer cancel()
+
+	res, err := m.pool.Exec(ctx, sql, userID)
+	if err != nil {
+		return err
+	}
+
+	if res.RowsAffected() == 0 {
+		return ErrRecordNotFound
 	}
 
 	return nil

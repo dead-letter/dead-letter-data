@@ -5,6 +5,8 @@ import (
 
 	"github.com/dead-letter/dead-letter-data/internal/data"
 	"github.com/dead-letter/dead-letter-data/internal/pb"
+	"github.com/gofrs/uuid/v5"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type server struct {
@@ -12,16 +14,73 @@ type server struct {
 	models data.Models
 }
 
-func (s *server) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.GetUserResponse, error) {
-	u, err := s.models.User.GetWithEmail(req.Email)
+func (srv *server) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.UserResponse, error) {
+	u, err := srv.models.User.New(req.Email, req.Password)
 	if err != nil {
 		return nil, err
 	}
 
-	var res pb.GetUserResponse
+	res := &pb.UserResponse{
+		User: u.Proto(),
+	}
 
-	res.Id = u.ID.String()
-	res.CreatedAt = u.CreatedAt.String()
+	return res, nil
+}
 
-	return &res, nil
+func (srv *server) GetUserByEmail(ctx context.Context, req *pb.GetUserByEmailRequest) (*pb.UserResponse, error) {
+	u, err := srv.models.User.GetWithEmail(req.Email)
+	if err != nil {
+		return nil, err
+	}
+
+	res := &pb.UserResponse{
+		User: u.Proto(),
+	}
+
+	return res, nil
+}
+
+func (srv *server) AuthenticateUser(ctx context.Context, req *pb.AuthenticateUserRequest) (*pb.UserResponse, error) {
+	u, err := srv.models.User.GetForCredentials(req.Email, req.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	res := &pb.UserResponse{
+		User: u.Proto(),
+	}
+
+	return res, nil
+}
+
+func (srv *server) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UserResponse, error) {
+	u, err := srv.models.User.FromProto(req)
+	if err != nil {
+		return nil, err
+	}
+
+	err = srv.models.User.Update(u)
+	if err != nil {
+		return nil, err
+	}
+
+	res := &pb.UserResponse{
+		User: u.Proto(),
+	}
+
+	return res, nil
+}
+
+func (srv *server) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest) (*emptypb.Empty, error) {
+	userID, err := uuid.FromString(req.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	err = srv.models.User.Delete(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &emptypb.Empty{}, nil
 }

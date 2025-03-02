@@ -55,7 +55,7 @@ proto/clean:
 .PHONY: migrations/new
 migrations/new:
 	@echo "Creating migration files for ${label}..."
-	go tool goose create ${label} sql
+	go tool goose -dir migrations -s create ${label} sql
 
 
 # confirmation dialog helper

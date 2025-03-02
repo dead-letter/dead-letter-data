@@ -12,7 +12,7 @@ import (
 //go:embed *.sql
 var embedMigrations embed.FS
 
-func Run(dsn string) error {
+func Run(dsn string, dev bool) error {
 	// Run migrations
 	db, err := sql.Open("pgx", dsn)
 	if err != nil {
@@ -26,8 +26,10 @@ func Run(dsn string) error {
 		return fmt.Errorf("failed to set dialect: %v", err)
 	}
 
-	if err := goose.Reset(db, "migrations"); err != nil {
-		return fmt.Errorf("failed to reset migrations: %v", err)
+	if dev {
+		if err := goose.Reset(db, "migrations"); err != nil {
+			return fmt.Errorf("failed to reset migrations: %v", err)
+		}
 	}
 
 	if err := goose.Up(db, "migrations"); err != nil {

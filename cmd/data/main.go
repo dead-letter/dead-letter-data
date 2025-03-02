@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net"
 	"os"
@@ -17,10 +18,16 @@ import (
 )
 
 func main() {
+	// Read environment
+	dev := os.Getenv("APP_ENV") == "development"
 	dsn := os.Getenv("DATABASE_URL")
 
+	if dev {
+		fmt.Println("DEVELOPMENT MODE")
+	}
+
 	// Run migartions
-	migrations.Run(dsn)
+	migrations.Run(dsn, dev)
 
 	// Open database pool
 	pool, err := openPool(dsn)
