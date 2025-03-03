@@ -1,29 +1,64 @@
-PROTO_DIR=../dead-letter-manifests/protos
-OUT_DIR=./pb
-
+PB_DIR_IN=../dead-letter-manifests/protos
+PB_DIR_OUT=./internal/pb
 PROTOC=$(shell which protoc)
-PROTOC_GEN_GO=$(shell which protoc-gen-go)
-PROTOC_GEN_GO_GRPC=$(shell which protoc-gen-go-grpc)
 
-.PHONY: all
-all: data
+## help: print this help message
+.PHONY: help
+help:
+	@echo "Usage:"
+	@sed -n "s/^##//p" ${MAKEFILE_LIST} | column -t -s ":" |  sed -e "s/^/ /"
 
-.PHONY: check
-check:
+
+## audit: tidy dependencies and format, vet and test all code
+.PHONY: audit
+audit:
+	@echo "Tidying and verifying module dependencies..."
+	go mod tidy
+	go mod verify
+	@echo "Formatting code..."
+	go fmt ./...
+	@echo "Vetting code..."
+	go vet ./...
+	go tool staticcheck ./...
+	@echo "Running tests..."
+	go test -race -vet=off ./...
+
+
+# proto/check: check for necessary build tools and directories
+.PHONY: proto/check
+proto/check:
 	@which protoc > /dev/null || { echo "❌ protoc not found"; exit 1; }
 	@which protoc-gen-go > /dev/null || { echo "❌ protoc-gen-go not found"; exit 1; }
 	@which protoc-gen-go-grpc > /dev/null || { echo "❌ protoc-gen-go-grpc not found"; exit 1; }
+	@[ -d "$(PB_DIR_IN)" ] || { echo "❌ PB_DIR_IN $(PB_DIR_IN) does not exist"; exit 1; }
 
-.PHONY: data
-data: check
-	@mkdir -p $(OUT_DIR)
-	@$(PROTOC) -I $(PROTO_DIR) \
-			--go_out=$(OUT_DIR) --go_opt=paths=source_relative \
-	        --go-grpc_out=$(OUT_DIR) --go-grpc_opt=paths=source_relative \
-	        $(PROTO_DIR)/data.proto
+
+## proto/gen: generate protoc stubs
+.PHONY: proto/gen
+proto/gen: proto/check
+	@mkdir -p $(PB_DIR_OUT)
+	@$(PROTOC) -I $(PB_DIR_IN) \
+			--go_out=$(PB_DIR_OUT) --go_opt=paths=source_relative \
+	        --go-grpc_out=$(PB_DIR_OUT) --go-grpc_opt=paths=source_relative \
+	        $(PB_DIR_IN)/data.proto
 	@echo "✅ Generated gRPC code for data.proto"
 
-.PHONY: clean
-clean:
-	@rm -f $(OUT_DIR)/*.pb.go
+
+## proto/clean: clean generated files
+.PHONY: proto/clean
+proto/clean:
+	@rm -f $(PB_DIR_OUT)/*.pb.go
 	@echo "🗑️  Cleaned generated files"
+
+
+## migrations/new label=$1: create a new database migration
+.PHONY: migrations/new
+migrations/new:
+	@echo "Creating migration files for ${label}..."
+	go tool goose -dir migrations -s create ${label} sql
+
+
+# confirmation dialog helper
+.PHONY: confirm
+confirm:
+	@echo -n "Are you sure? [y/N] " && read ans && [ $${ans:-N} = y ]
