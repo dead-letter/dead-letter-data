@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"database/sql"
 	"log"
 	"net"
 	"os"
@@ -22,12 +22,18 @@ func main() {
 	dev := os.Getenv("APP_ENV") == "development"
 	dsn := os.Getenv("DATABASE_URL")
 
-	if dev {
-		fmt.Println("DEVELOPMENT MODE")
+	// Run migartions
+	db, err := sql.Open("pgx", dsn)
+	if err != nil {
+		log.Fatalf("failed to open db: %v\n", err)
 	}
 
-	// Run migartions
-	migrations.Run(dsn, dev)
+	migrations.Up(db)
+	if dev {
+		migrations.Reset(db)
+	}
+
+	db.Close()
 
 	// Open database pool
 	pool, err := openPool(dsn)
