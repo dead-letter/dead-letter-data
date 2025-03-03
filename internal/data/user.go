@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/alexedwards/argon2id"
-	"github.com/dead-letter/dead-letter-data/internal/pb"
+	"github.com/dead-letter/dead-letter-data/pkg/pb"
 	validation "github.com/go-ozzo/ozzo-validation"
 	"github.com/go-ozzo/ozzo-validation/is"
 	"github.com/gofrs/uuid/v5"

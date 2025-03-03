@@ -1,5 +1,5 @@
 PB_DIR_IN=../dead-letter-manifests/protos
-PB_DIR_OUT=./internal/pb
+PB_DIR_OUT=./pkg/pb
 PROTOC=$(shell which protoc)
 
 ## help: print this help message

@@ -8,9 +8,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/dead-letter/dead-letter-data/internal/pb"
 	"github.com/dead-letter/dead-letter-data/internal/server"
 	"github.com/dead-letter/dead-letter-data/migrations"
+	"github.com/dead-letter/dead-letter-data/pkg/pb"
 	pgxuuid "github.com/jackc/pgx-gofrs-uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"

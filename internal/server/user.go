@@ -3,7 +3,7 @@ package server
 import (
 	"context"
 
-	"github.com/dead-letter/dead-letter-data/internal/pb"
+	"github.com/dead-letter/dead-letter-data/pkg/pb"
 	"github.com/gofrs/uuid/v5"
 	"google.golang.org/protobuf/types/known/emptypb"
 )

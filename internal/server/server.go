@@ -2,7 +2,7 @@ package server
 
 import (
 	"github.com/dead-letter/dead-letter-data/internal/data"
-	"github.com/dead-letter/dead-letter-data/internal/pb"
+	"github.com/dead-letter/dead-letter-data/pkg/pb"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
