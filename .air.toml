@@ -1,0 +1,10 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  cmd = "go build -o main ./cmd/data"
+  bin = "main"
+  exclude_dir = ["tmp", "vendor"]
+
+[log]
+  level = "info"

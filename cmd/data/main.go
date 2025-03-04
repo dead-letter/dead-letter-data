@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
-	"log"
+	"log/slog"
 	"net"
 	"os"
 	"time"
@@ -14,6 +14,7 @@ import (
 	pgxuuid "github.com/jackc/pgx-gofrs-uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/lmittmann/tint"
 	"google.golang.org/grpc"
 )
 
@@ -22,10 +23,14 @@ func main() {
 	dev := os.Getenv("APP_ENV") == "development"
 	dsn := os.Getenv("DATABASE_URL")
 
+	// Logger
+	h := newSlogHandler(dev)
+	logger := slog.New(h)
+
 	// Run migartions
 	db, err := sql.Open("pgx", dsn)
 	if err != nil {
-		log.Fatalf("failed to open db: %v\n", err)
+		fatal(logger, err)
 	}
 
 	migrations.Up(db)
@@ -38,21 +43,45 @@ func main() {
 	// Open database pool
 	pool, err := openPool(dsn)
 	if err != nil {
-		log.Fatalf("Unable to connect to database: %v\n", err)
+		fatal(logger, err)
 	}
 	defer pool.Close()
 
-	// Create server
-	srv := server.New(pool)
+	// Run gRPC server
+	srv := server.New(logger, pool)
 
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		fatal(logger, err)
 	}
 
 	grpcServer := grpc.NewServer()
 	pb.RegisterDataServiceServer(grpcServer, srv)
+
+	logger.Info("starting gRPC server", slog.String("addr", lis.Addr().String()))
 	grpcServer.Serve(lis)
+	if err != nil {
+		fatal(logger, err)
+	}
+}
+
+func newSlogHandler(dev bool) slog.Handler {
+	if dev {
+		// Development text hanlder
+		return tint.NewHandler(os.Stdout, &tint.Options{
+			AddSource:  true,
+			Level:      slog.LevelDebug,
+			TimeFormat: time.Kitchen,
+		})
+	}
+
+	// Production use JSON handler with default opts
+	return slog.NewJSONHandler(os.Stdout, nil)
+}
+
+func fatal(logger *slog.Logger, err error) {
+	logger.Error("fatal", slog.Any("err", err))
+	os.Exit(1)
 }
 
 func openPool(dsn string) (*pgxpool.Pool, error) {
