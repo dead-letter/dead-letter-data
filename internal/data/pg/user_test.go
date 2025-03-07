@@ -8,8 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const ()
-
 func TestUserService(t *testing.T) {
 	t.Parallel()
 	models, pool := testModels(t)

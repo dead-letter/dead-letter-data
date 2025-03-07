@@ -57,6 +57,7 @@ func main() {
 	// Create gRPC server
 	grpcServer := grpc.NewServer()
 	pb.RegisterUserServiceServer(grpcServer, rpc.NewUserServiceServer(models))
+	pb.RegisterRiderServiceServer(grpcServer, rpc.NewRiderServiceServer(models))
 
 	// Run server
 	lis, err := net.Listen("tcp", ":50051")
