@@ -19,6 +19,6 @@ type Server struct {
 func New(logger *slog.Logger, pool *pgxpool.Pool) *Server {
 	return &Server{
 		log:   logger,
-		users: pg.UserService{Pool: pool},
+		users: pg.NewUserService(pool),
 	}
 }

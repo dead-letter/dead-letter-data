@@ -4,7 +4,6 @@ import (
 	"errors"
 )
 
-// Sentinel errors
 var (
 	ErrRecordNotFound     = errors.New("data: no matching record found")
 	ErrInvalidCredentials = errors.New("data: invalid credentials")
@@ -12,3 +11,9 @@ var (
 	ErrExpiredToken       = errors.New("data: expired token")
 	ErrEditConflict       = errors.New("data: edit conflict")
 )
+
+type Models struct {
+	User   UserService
+	Rider  RiderService
+	Vendor VendorService
+}

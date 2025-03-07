@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log/slog"
 	"net"
 	"os"
@@ -16,8 +17,13 @@ import (
 )
 
 func main() {
+	var dev bool
+
+	// CLI flags
+	flag.BoolVar(&dev, "dev", false, "Development mode")
+	flag.Parse()
+
 	// Read environment
-	dev := os.Getenv("APP_ENV") == "development"
 	dsn := os.Getenv("DATABASE_URL")
 
 	// Logger
@@ -33,12 +39,10 @@ func main() {
 
 	// Run migrations
 	db := stdlib.OpenDBFromPool(pool)
-
 	migrations.Up(db)
 	if dev {
 		migrations.Reset(db)
 	}
-
 	db.Close()
 
 	// Run gRPC server

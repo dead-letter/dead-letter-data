@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/dead-letter/dead-letter-data/internal/data"
 	"github.com/dead-letter/dead-letter-data/migrations"
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/testcontainers/testcontainers-go"
@@ -12,7 +13,7 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
-var s UserService
+var models data.Models
 
 func TestMain(m *testing.M) {
 	// Start Postgres instance
@@ -49,7 +50,7 @@ func TestMain(m *testing.M) {
 	migrations.Up(db)
 	db.Close()
 
-	s = UserService{Pool: pool}
+	models = Models(pool)
 
 	m.Run()
 }

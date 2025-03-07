@@ -13,7 +13,11 @@ import (
 )
 
 type UserService struct {
-	Pool *pgxpool.Pool
+	pool *pgxpool.Pool
+}
+
+func NewUserService(pool *pgxpool.Pool) UserService {
+	return UserService{pool: pool}
 }
 
 func (s UserService) Create(email, password string) (*data.User, error) {
@@ -37,7 +41,7 @@ func (s UserService) Create(email, password string) (*data.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
 	defer cancel()
 
-	err = s.Pool.QueryRow(ctx, sql, args...).Scan(
+	err = s.pool.QueryRow(ctx, sql, args...).Scan(
 		&u.ID,
 		&u.CreatedAt,
 		&u.Version,
@@ -64,7 +68,7 @@ func (s UserService) Read(id uuid.UUID) (*data.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
 	defer cancel()
 
-	err := s.Pool.QueryRow(ctx, sql, id).Scan(
+	err := s.pool.QueryRow(ctx, sql, id).Scan(
 		&u.ID,
 		&u.CreatedAt,
 		&u.Version,
@@ -93,7 +97,7 @@ func (s UserService) ReadWithEmail(email string) (*data.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
 	defer cancel()
 
-	err := s.Pool.QueryRow(ctx, sql, email).Scan(
+	err := s.pool.QueryRow(ctx, sql, email).Scan(
 		&u.ID,
 		&u.CreatedAt,
 		&u.Version,
@@ -146,7 +150,7 @@ func (s UserService) Update(user *data.User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
 	defer cancel()
 
-	err := s.Pool.QueryRow(ctx, sql, args...).Scan(&user.Version)
+	err := s.pool.QueryRow(ctx, sql, args...).Scan(&user.Version)
 	if err != nil {
 		switch {
 		case errors.Is(err, pgx.ErrNoRows):
@@ -169,7 +173,7 @@ func (s UserService) Delete(id uuid.UUID) error {
 	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
 	defer cancel()
 
-	res, err := s.Pool.Exec(ctx, sql, id)
+	res, err := s.pool.Exec(ctx, sql, id)
 	if err != nil {
 		return err
 	}
