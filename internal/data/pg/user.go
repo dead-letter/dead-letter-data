@@ -12,15 +12,15 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type UserService struct {
+type UserModel struct {
 	pool *pgxpool.Pool
 }
 
-func NewUserService(pool *pgxpool.Pool) UserService {
-	return UserService{pool: pool}
+func NewUserModel(pool *pgxpool.Pool) UserModel {
+	return UserModel{pool: pool}
 }
 
-func (s UserService) Create(email, password string) (*data.User, error) {
+func (s UserModel) Create(email, password string) (*data.User, error) {
 	hash, err := argon2id.CreateHash(password, argon2id.DefaultParams)
 	if err != nil {
 		return nil, err
@@ -58,7 +58,7 @@ func (s UserService) Create(email, password string) (*data.User, error) {
 	return &u, nil
 }
 
-func (s UserService) Read(id uuid.UUID) (*data.User, error) {
+func (s UserModel) Read(id uuid.UUID) (*data.User, error) {
 	var u data.User
 
 	sql := `
@@ -87,7 +87,7 @@ func (s UserService) Read(id uuid.UUID) (*data.User, error) {
 	return &u, nil
 }
 
-func (s UserService) ReadWithEmail(email string) (*data.User, error) {
+func (s UserModel) ReadWithEmail(email string) (*data.User, error) {
 	var u data.User
 
 	sql := `
@@ -116,7 +116,7 @@ func (s UserService) ReadWithEmail(email string) (*data.User, error) {
 	return &u, nil
 }
 
-func (s UserService) ReadWithCredentials(email, password string) (*data.User, error) {
+func (s UserModel) ReadWithCredentials(email, password string) (*data.User, error) {
 	u, err := s.ReadWithEmail(email)
 	if err != nil {
 		return nil, err
@@ -133,7 +133,7 @@ func (s UserService) ReadWithCredentials(email, password string) (*data.User, er
 	return u, nil
 }
 
-func (s UserService) Update(u *data.User) error {
+func (s UserModel) Update(u *data.User) error {
 	sql := `
 		UPDATE user_ 
         SET email_ = $1, password_hash_ = $2, version_ = version_ + 1
@@ -167,7 +167,7 @@ func (s UserService) Update(u *data.User) error {
 	return nil
 }
 
-func (s UserService) Delete(id uuid.UUID) error {
+func (s UserModel) Delete(id uuid.UUID) error {
 	sql := `
 		DELETE FROM user_
 		WHERE id_ = $1;`

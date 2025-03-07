@@ -49,10 +49,7 @@ func main() {
 	db.Close()
 
 	// Create models
-	models = &data.Models{
-		User:  pg.NewUserService(pool),
-		Rider: pg.NewRiderService(pool),
-	}
+	models = pg.NewModels(pool)
 
 	// Create gRPC server
 	grpcServer := grpc.NewServer()

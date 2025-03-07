@@ -5,7 +5,7 @@ import (
 	"github.com/gofrs/uuid/v5"
 )
 
-type RiderService interface {
+type RiderModel interface {
 	Create(ID uuid.UUID) (*Rider, error)
 	Read(ID uuid.UUID) (*Rider, error)
 	Update(Rider *Rider) error

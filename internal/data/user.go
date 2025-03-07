@@ -8,7 +8,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-type UserService interface {
+type UserModel interface {
 	Create(email, password string) (*User, error)
 	Read(id uuid.UUID) (*User, error)
 	ReadWithEmail(email string) (*User, error)

@@ -11,17 +11,17 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type RiderService struct {
+type RiderModel struct {
 	pool *pgxpool.Pool
 }
 
-func NewRiderService(pool *pgxpool.Pool) RiderService {
-	return RiderService{
+func NewRiderModel(pool *pgxpool.Pool) RiderModel {
+	return RiderModel{
 		pool: pool,
 	}
 }
 
-func (s RiderService) Create(id uuid.UUID) (*data.Rider, error) {
+func (s RiderModel) Create(id uuid.UUID) (*data.Rider, error) {
 	r := data.Rider{
 		ID: id,
 	}
@@ -44,7 +44,7 @@ func (s RiderService) Create(id uuid.UUID) (*data.Rider, error) {
 	return &r, nil
 }
 
-func (s RiderService) Read(id uuid.UUID) (*data.Rider, error) {
+func (s RiderModel) Read(id uuid.UUID) (*data.Rider, error) {
 	var r data.Rider
 
 	sql := `
@@ -70,7 +70,7 @@ func (s RiderService) Read(id uuid.UUID) (*data.Rider, error) {
 	return &r, nil
 }
 
-func (s RiderService) Update(r *data.Rider) error {
+func (s RiderModel) Update(r *data.Rider) error {
 	sql := `
 		UPDATE rider_ 
         SET version_ = version_ + 1
