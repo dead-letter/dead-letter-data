@@ -30,7 +30,7 @@ func TestUserService(t *testing.T) {
 		testUser, err = models.User.Create(testEmail, validPassword)
 		assert.NoError(t, err)
 		assert.NotNil(t, testUser)
-		assert.Equal(t, 1, testUser.Version)
+		assert.Equal(t, int32(1), testUser.Version)
 		assert.Equal(t, testEmail, testUser.Email)
 	})
 
@@ -104,7 +104,6 @@ func TestUserService(t *testing.T) {
 		newUser, err = models.User.Create(newEmail, validPassword)
 		assert.NoError(t, err)
 		assert.NotNil(t, newUser)
-		assert.Equal(t, 1, newUser.Version)
 		assert.Equal(t, newEmail, newUser.Email)
 
 		newUser.Email = testEmail

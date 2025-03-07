@@ -34,7 +34,7 @@ func (s UserService) Create(email, password string) (*data.User, error) {
 	sql := `
 		INSERT INTO user_ (email_, password_hash_)
 		VALUES($1, $2)
-		RETURNING id_, created_at_, version_;`
+		RETURNING id_, version_, created_at_;`
 
 	args := []any{u.Email, u.PasswordHash}
 
@@ -43,8 +43,8 @@ func (s UserService) Create(email, password string) (*data.User, error) {
 
 	err = s.pool.QueryRow(ctx, sql, args...).Scan(
 		&u.ID,
-		&u.CreatedAt,
 		&u.Version,
+		&u.CreatedAt,
 	)
 	if err != nil {
 		switch {
@@ -62,7 +62,7 @@ func (s UserService) Read(id uuid.UUID) (*data.User, error) {
 	var u data.User
 
 	sql := `
-		SELECT id_, created_at_, version_, email_, password_hash_
+		SELECT id_, version_, created_at_, email_, password_hash_
 		FROM user_ WHERE id_ = $1;`
 
 	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
@@ -70,8 +70,8 @@ func (s UserService) Read(id uuid.UUID) (*data.User, error) {
 
 	err := s.pool.QueryRow(ctx, sql, id).Scan(
 		&u.ID,
-		&u.CreatedAt,
 		&u.Version,
+		&u.CreatedAt,
 		&u.Email,
 		&u.PasswordHash,
 	)
@@ -91,7 +91,7 @@ func (s UserService) ReadWithEmail(email string) (*data.User, error) {
 	var u data.User
 
 	sql := `
-		SELECT id_, created_at_, version_, email_, password_hash_
+		SELECT id_, version_, created_at_, email_, password_hash_
 		FROM user_ WHERE email_ = $1;`
 
 	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
@@ -99,8 +99,8 @@ func (s UserService) ReadWithEmail(email string) (*data.User, error) {
 
 	err := s.pool.QueryRow(ctx, sql, email).Scan(
 		&u.ID,
-		&u.CreatedAt,
 		&u.Version,
+		&u.CreatedAt,
 		&u.Email,
 		&u.PasswordHash,
 	)

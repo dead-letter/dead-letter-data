@@ -26,7 +26,7 @@ func TestRiderService(t *testing.T) {
 		testUser, err = models.User.Create(testEmail, validPassword)
 		assert.NoError(t, err)
 		assert.NotNil(t, testUser)
-		assert.Equal(t, 1, testUser.Version)
+		assert.Equal(t, int32(1), testUser.Version)
 		assert.Equal(t, testEmail, testUser.Email)
 	})
 
@@ -34,7 +34,7 @@ func TestRiderService(t *testing.T) {
 		testRider, err = models.Rider.Create(testUser.ID)
 		assert.NoError(t, err)
 		assert.NotNil(t, testRider)
-		assert.Equal(t, 1, testRider.Version)
+		assert.Equal(t, int32(1), testRider.Version)
 		assert.Equal(t, testUser.ID, testRider.ID)
 	})
 

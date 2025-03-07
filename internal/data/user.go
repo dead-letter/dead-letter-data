@@ -19,8 +19,8 @@ type UserService interface {
 
 type User struct {
 	ID           uuid.UUID
+	Version      int32
 	CreatedAt    time.Time
-	Version      int
 	Email        string
 	PasswordHash []byte
 }
@@ -41,7 +41,7 @@ func UserFromProto(req *pb.UpdateUserRequest) (*User, error) {
 
 	u := &User{
 		ID:           id,
-		Version:      int(req.Version),
+		Version:      req.Version,
 		Email:        req.Email,
 		PasswordHash: []byte(req.PasswordHash),
 	}

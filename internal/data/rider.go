@@ -12,5 +12,5 @@ type RiderService interface {
 
 type Rider struct {
 	ID      uuid.UUID
-	Version int
+	Version int32
 }
