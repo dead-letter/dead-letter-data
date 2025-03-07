@@ -9,8 +9,8 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-func (srv *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.UserResponse, error) {
-	u, err := srv.users.Create(req.Email, req.Password)
+func (s *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.UserResponse, error) {
+	u, err := s.models.User.Create(req.Email, req.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -22,8 +22,8 @@ func (srv *Server) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*
 	return res, nil
 }
 
-func (srv *Server) GetUserByEmail(ctx context.Context, req *pb.GetUserByEmailRequest) (*pb.UserResponse, error) {
-	u, err := srv.users.ReadWithEmail(req.Email)
+func (s *Server) GetUserByEmail(ctx context.Context, req *pb.GetUserByEmailRequest) (*pb.UserResponse, error) {
+	u, err := s.models.User.ReadWithEmail(req.Email)
 	if err != nil {
 		return nil, err
 	}
@@ -35,8 +35,8 @@ func (srv *Server) GetUserByEmail(ctx context.Context, req *pb.GetUserByEmailReq
 	return res, nil
 }
 
-func (srv *Server) AuthenticateUser(ctx context.Context, req *pb.AuthenticateUserRequest) (*pb.UserResponse, error) {
-	u, err := srv.users.ReadWithEmailAndPassword(req.Email, req.Password)
+func (s *Server) AuthenticateUser(ctx context.Context, req *pb.AuthenticateUserRequest) (*pb.UserResponse, error) {
+	u, err := s.models.User.ReadWithCredentials(req.Email, req.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -48,13 +48,13 @@ func (srv *Server) AuthenticateUser(ctx context.Context, req *pb.AuthenticateUse
 	return res, nil
 }
 
-func (srv *Server) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UserResponse, error) {
+func (s *Server) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UserResponse, error) {
 	u, err := data.UserFromProto(req)
 	if err != nil {
 		return nil, err
 	}
 
-	err = srv.users.Update(u)
+	err = s.models.User.Update(u)
 	if err != nil {
 		return nil, err
 	}
@@ -66,13 +66,13 @@ func (srv *Server) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*
 	return res, nil
 }
 
-func (srv *Server) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest) (*emptypb.Empty, error) {
+func (s *Server) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest) (*emptypb.Empty, error) {
 	userID, err := uuid.FromString(req.Id)
 	if err != nil {
 		return nil, err
 	}
 
-	err = srv.users.Delete(userID)
+	err = s.models.User.Delete(userID)
 	if err != nil {
 		return nil, err
 	}

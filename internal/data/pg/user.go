@@ -116,7 +116,7 @@ func (s UserService) ReadWithEmail(email string) (*data.User, error) {
 	return &u, nil
 }
 
-func (s UserService) ReadWithEmailAndPassword(email, password string) (*data.User, error) {
+func (s UserService) ReadWithCredentials(email, password string) (*data.User, error) {
 	u, err := s.ReadWithEmail(email)
 	if err != nil {
 		return nil, err
@@ -133,7 +133,7 @@ func (s UserService) ReadWithEmailAndPassword(email, password string) (*data.Use
 	return u, nil
 }
 
-func (s UserService) Update(user *data.User) error {
+func (s UserService) Update(u *data.User) error {
 	sql := `
 		UPDATE user_ 
         SET email_ = $1, password_hash_ = $2, version_ = version_ + 1
@@ -141,16 +141,18 @@ func (s UserService) Update(user *data.User) error {
         RETURNING version_;`
 
 	args := []any{
-		user.Email,
-		user.PasswordHash,
-		user.ID,
-		user.Version,
+		u.Email,
+		u.PasswordHash,
+		u.ID,
+		u.Version,
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
 	defer cancel()
 
-	err := s.pool.QueryRow(ctx, sql, args...).Scan(&user.Version)
+	err := s.pool.QueryRow(ctx, sql, args...).Scan(
+		&u.Version,
+	)
 	if err != nil {
 		switch {
 		case errors.Is(err, pgx.ErrNoRows):

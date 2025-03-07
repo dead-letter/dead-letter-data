@@ -1,0 +1,17 @@
+services:
+  pgtestdb:
+    image: postgres:15
+    environment:
+      POSTGRES_PASSWORD: password
+    restart: unless-stopped
+    volumes:
+      - type: tmpfs
+        target: /var/lib/postgresql/data/
+    command:
+      - "postgres"
+      - "-c" # turn off fsync for speed
+      - "fsync=off"
+      - "-c" # log everything for debugging
+      - "log_statement=all"
+    ports:
+      - "5433:5432"

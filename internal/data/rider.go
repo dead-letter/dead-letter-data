@@ -5,12 +5,12 @@ import (
 )
 
 type RiderService interface {
-	Create(userID uuid.UUID) (*Rider, error)
-	Read(userID uuid.UUID) (*Rider, error)
+	Create(ID uuid.UUID) (*Rider, error)
+	Read(ID uuid.UUID) (*Rider, error)
 	Update(Rider *Rider) error
-	Delete(userID uuid.UUID) error
 }
 
 type Rider struct {
-	User *User
+	ID      uuid.UUID
+	Version int
 }

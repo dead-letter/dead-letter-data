@@ -12,7 +12,7 @@ type UserService interface {
 	Create(email, password string) (*User, error)
 	Read(id uuid.UUID) (*User, error)
 	ReadWithEmail(email string) (*User, error)
-	ReadWithEmailAndPassword(email, password string) (*User, error)
+	ReadWithCredentials(email, password string) (*User, error)
 	Update(user *User) error
 	Delete(id uuid.UUID) error
 }

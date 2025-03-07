@@ -24,6 +24,18 @@ audit:
 	go test -race -vet=off ./...
 
 
+# test/check: ensure pgtestdb container is running
+.PHONY: test/check
+test/check:
+	@docker info > /dev/null 2>&1 || (echo "docker is not running"; exit 1)
+	@docker compose ps -q pgtestdb | grep -q . || (echo -e "pgtestdb container is not runnning\nrun: docker compose up -d"; exit 1)
+
+## test: run verbose tests
+.PHONY: test
+test: test/check
+	go test -v ./...
+
+
 # proto/check: check for necessary build tools and directories
 .PHONY: proto/check
 proto/check:

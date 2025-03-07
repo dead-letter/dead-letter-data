@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/dead-letter/dead-letter-data/internal/data"
 	"github.com/dead-letter/dead-letter-data/internal/data/pg"
 	"github.com/dead-letter/dead-letter-data/internal/server"
 	"github.com/dead-letter/dead-letter-data/migrations"
@@ -45,8 +46,14 @@ func main() {
 	}
 	db.Close()
 
+	// Create models
+	models := &data.Models{
+		User:  pg.NewUserService(pool),
+		Rider: pg.NewRiderService(pool),
+	}
+
 	// Run gRPC server
-	srv := server.New(logger, pool)
+	srv := server.New(models)
 
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
