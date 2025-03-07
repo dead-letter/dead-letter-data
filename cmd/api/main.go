@@ -1,19 +1,16 @@
 package main
 
 import (
-	"context"
-	"database/sql"
 	"log/slog"
 	"net"
 	"os"
 	"time"
 
+	"github.com/dead-letter/dead-letter-data/internal/data/pg"
 	"github.com/dead-letter/dead-letter-data/internal/server"
 	"github.com/dead-letter/dead-letter-data/migrations"
 	"github.com/dead-letter/dead-letter-data/pkg/pb"
-	pgxuuid "github.com/jackc/pgx-gofrs-uuid"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/lmittmann/tint"
 	"google.golang.org/grpc"
 )
@@ -27,11 +24,15 @@ func main() {
 	h := newSlogHandler(dev)
 	logger := slog.New(h)
 
-	// Run migartions
-	db, err := sql.Open("pgx", dsn)
+	// Open database pool
+	pool, err := pg.OpenPool(dsn)
 	if err != nil {
 		fatal(logger, err)
 	}
+	defer pool.Close()
+
+	// Run migrations
+	db := stdlib.OpenDBFromPool(pool)
 
 	migrations.Up(db)
 	if dev {
@@ -39,13 +40,6 @@ func main() {
 	}
 
 	db.Close()
-
-	// Open database pool
-	pool, err := openPool(dsn)
-	if err != nil {
-		fatal(logger, err)
-	}
-	defer pool.Close()
 
 	// Run gRPC server
 	srv := server.New(logger, pool)
@@ -82,30 +76,4 @@ func newSlogHandler(dev bool) slog.Handler {
 func fatal(logger *slog.Logger, err error) {
 	logger.Error("fatal", slog.Any("err", err))
 	os.Exit(1)
-}
-
-func openPool(dsn string) (*pgxpool.Pool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	config, err := pgxpool.ParseConfig(dsn)
-	if err != nil {
-		return nil, err
-	}
-	config.AfterConnect = func(ctx context.Context, conn *pgx.Conn) error {
-		pgxuuid.Register(conn.TypeMap())
-		return nil
-	}
-
-	pool, err := pgxpool.NewWithConfig(ctx, config)
-	if err != nil {
-		return nil, err
-	}
-
-	err = pool.Ping(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return pool, err
 }

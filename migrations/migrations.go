@@ -10,10 +10,10 @@ import (
 )
 
 //go:embed *.sql
-var embedMigrations embed.FS
+var Files embed.FS
 
 func Up(db *sql.DB) error {
-	goose.SetBaseFS(embedMigrations)
+	goose.SetBaseFS(Files)
 
 	if err := goose.SetDialect("postgres"); err != nil {
 		return fmt.Errorf("failed to set dialect: %v", err)
