@@ -47,13 +47,13 @@ proto/check:
 
 ## proto/gen: generate protoc stubs
 .PHONY: proto/gen
-proto/gen: proto/check
+proto/gen: proto/check proto/clean
 	@mkdir -p $(PB_DIR_OUT)
 	@$(PROTOC) -I $(PB_DIR_IN) \
 			--go_out=$(PB_DIR_OUT) --go_opt=paths=source_relative \
 	        --go-grpc_out=$(PB_DIR_OUT) --go-grpc_opt=paths=source_relative \
-	        $(PB_DIR_IN)/data.proto
-	@echo "✅ Generated gRPC code for data.proto"
+	        $(PB_DIR_IN)/*.proto
+	@echo "✅ Generated gRPC code for protos"
 
 
 ## proto/clean: clean generated files

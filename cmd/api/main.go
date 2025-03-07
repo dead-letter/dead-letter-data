@@ -9,13 +9,15 @@ import (
 
 	"github.com/dead-letter/dead-letter-data/internal/data"
 	"github.com/dead-letter/dead-letter-data/internal/data/pg"
-	"github.com/dead-letter/dead-letter-data/internal/server"
+	"github.com/dead-letter/dead-letter-data/internal/rpc"
 	"github.com/dead-letter/dead-letter-data/migrations"
 	"github.com/dead-letter/dead-letter-data/pkg/pb"
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/lmittmann/tint"
 	"google.golang.org/grpc"
 )
+
+var models *data.Models
 
 func main() {
 	var dev bool
@@ -47,21 +49,20 @@ func main() {
 	db.Close()
 
 	// Create models
-	models := &data.Models{
+	models = &data.Models{
 		User:  pg.NewUserService(pool),
 		Rider: pg.NewRiderService(pool),
 	}
 
-	// Run gRPC server
-	srv := server.New(models)
+	// Create gRPC server
+	grpcServer := grpc.NewServer()
+	pb.RegisterUserServiceServer(grpcServer, rpc.NewUserServiceServer(models))
 
+	// Run server
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
 		fatal(logger, err)
 	}
-
-	grpcServer := grpc.NewServer()
-	pb.RegisterDataServiceServer(grpcServer, srv)
 
 	logger.Info("starting gRPC server", slog.String("addr", lis.Addr().String()))
 	grpcServer.Serve(lis)

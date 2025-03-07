@@ -25,9 +25,10 @@ type User struct {
 	PasswordHash []byte
 }
 
-func (u *User) Proto() *pb.User {
-	return &pb.User{
+func (u *User) Proto() *pb.UserResponse {
+	return &pb.UserResponse{
 		Id:        u.ID.String(),
+		Version:   u.Version,
 		CreatedAt: timestamppb.New(u.CreatedAt),
 		Email:     u.Email,
 	}
