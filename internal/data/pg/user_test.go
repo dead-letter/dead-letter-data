@@ -54,17 +54,14 @@ func TestUserService(t *testing.T) {
 		assert.ErrorIs(t, err, data.ErrRecordNotFound)
 	})
 
-	t.Run("TestReadWithEmail", func(t *testing.T) {
-		var readUser *data.User
-		readUser, err = us.ReadWithEmail(ctx, testEmail)
+	t.Run("TestExistsWithEmail", func(t *testing.T) {
+		exists, err := us.ExistsWithEmail(ctx, testEmail)
 		assert.NoError(t, err)
-		assert.NotNil(t, readUser)
-		assert.Equal(t, testUser, readUser)
-	})
+		assert.True(t, exists)
 
-	t.Run("TestReadWithNonExistantEmail", func(t *testing.T) {
-		_, err := us.ReadWithEmail(ctx, nonExistantEmail)
-		assert.ErrorIs(t, err, data.ErrRecordNotFound)
+		exists, err = us.ExistsWithEmail(ctx, nonExistantEmail)
+		assert.NoError(t, err)
+		assert.False(t, exists)
 	})
 
 	t.Run("TestReadWithCredentials", func(t *testing.T) {

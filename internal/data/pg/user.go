@@ -16,8 +16,6 @@ type UserService struct {
 	Pool *pgxpool.Pool
 }
 
-var _ data.UserService = (*UserService)(nil)
-
 func (s *UserService) Create(ctx context.Context, email string, passwordHash []byte) (*data.User, error) {
 	u := data.User{
 		Email:        email,
@@ -74,7 +72,30 @@ func (s *UserService) Read(ctx context.Context, id uuid.UUID) (*data.User, error
 	return &u, nil
 }
 
-func (s *UserService) ReadWithEmail(ctx context.Context, email string) (*data.User, error) {
+func (s *UserService) ExistsWithEmail(ctx context.Context, email string) (bool, error) {
+	var exists bool
+
+	sql := `
+		SELECT EXISTS (
+			SELECT 1
+			FROM user_
+			WHERE email_ = $1
+		);`
+
+	err := s.Pool.QueryRow(ctx, sql, email).Scan(&exists)
+	if err != nil {
+		switch {
+		case errors.Is(err, pgx.ErrNoRows):
+			return false, nil
+		default:
+			return exists, err
+		}
+	}
+
+	return exists, nil
+}
+
+func (s *UserService) ReadWithCredentials(ctx context.Context, email string, passwordHash []byte) (*data.User, error) {
 	var u data.User
 
 	sql := `
@@ -97,20 +118,11 @@ func (s *UserService) ReadWithEmail(ctx context.Context, email string) (*data.Us
 		}
 	}
 
-	return &u, nil
-}
-
-func (s *UserService) ReadWithCredentials(ctx context.Context, email string, passwordHash []byte) (*data.User, error) {
-	u, err := s.ReadWithEmail(ctx, email)
-	if err != nil {
-		return nil, err
-	}
-
 	if !bytes.Equal(passwordHash, u.PasswordHash) {
 		return nil, data.ErrInvalidCredentials
 	}
 
-	return u, nil
+	return &u, nil
 }
 
 func (s *UserService) Update(ctx context.Context, u *data.User) error {

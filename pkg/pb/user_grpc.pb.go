@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	UserService_CreateUser_FullMethodName              = "/data.UserService/CreateUser"
 	UserService_ReadUser_FullMethodName                = "/data.UserService/ReadUser"
-	UserService_ReadUserWithEmail_FullMethodName       = "/data.UserService/ReadUserWithEmail"
+	UserService_CheckUserExists_FullMethodName         = "/data.UserService/CheckUserExists"
 	UserService_ReadUserWithCredentials_FullMethodName = "/data.UserService/ReadUserWithCredentials"
 	UserService_UpdateUser_FullMethodName              = "/data.UserService/UpdateUser"
 	UserService_DeleteUser_FullMethodName              = "/data.UserService/DeleteUser"
@@ -34,7 +34,7 @@ const (
 type UserServiceClient interface {
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*UserResponse, error)
 	ReadUser(ctx context.Context, in *ReadUserRequest, opts ...grpc.CallOption) (*UserResponse, error)
-	ReadUserWithEmail(ctx context.Context, in *ReadUserWithEmailRequest, opts ...grpc.CallOption) (*UserResponse, error)
+	CheckUserExists(ctx context.Context, in *CheckUserExistsRequest, opts ...grpc.CallOption) (*CheckUserExistsResponse, error)
 	ReadUserWithCredentials(ctx context.Context, in *ReadUserWithCredentialsRequest, opts ...grpc.CallOption) (*UserResponse, error)
 	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*UserResponse, error)
 	DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -68,10 +68,10 @@ func (c *userServiceClient) ReadUser(ctx context.Context, in *ReadUserRequest, o
 	return out, nil
 }
 
-func (c *userServiceClient) ReadUserWithEmail(ctx context.Context, in *ReadUserWithEmailRequest, opts ...grpc.CallOption) (*UserResponse, error) {
+func (c *userServiceClient) CheckUserExists(ctx context.Context, in *CheckUserExistsRequest, opts ...grpc.CallOption) (*CheckUserExistsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UserResponse)
-	err := c.cc.Invoke(ctx, UserService_ReadUserWithEmail_FullMethodName, in, out, cOpts...)
+	out := new(CheckUserExistsResponse)
+	err := c.cc.Invoke(ctx, UserService_CheckUserExists_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +114,7 @@ func (c *userServiceClient) DeleteUser(ctx context.Context, in *DeleteUserReques
 type UserServiceServer interface {
 	CreateUser(context.Context, *CreateUserRequest) (*UserResponse, error)
 	ReadUser(context.Context, *ReadUserRequest) (*UserResponse, error)
-	ReadUserWithEmail(context.Context, *ReadUserWithEmailRequest) (*UserResponse, error)
+	CheckUserExists(context.Context, *CheckUserExistsRequest) (*CheckUserExistsResponse, error)
 	ReadUserWithCredentials(context.Context, *ReadUserWithCredentialsRequest) (*UserResponse, error)
 	UpdateUser(context.Context, *UpdateUserRequest) (*UserResponse, error)
 	DeleteUser(context.Context, *DeleteUserRequest) (*emptypb.Empty, error)
@@ -134,8 +134,8 @@ func (UnimplementedUserServiceServer) CreateUser(context.Context, *CreateUserReq
 func (UnimplementedUserServiceServer) ReadUser(context.Context, *ReadUserRequest) (*UserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadUser not implemented")
 }
-func (UnimplementedUserServiceServer) ReadUserWithEmail(context.Context, *ReadUserWithEmailRequest) (*UserResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ReadUserWithEmail not implemented")
+func (UnimplementedUserServiceServer) CheckUserExists(context.Context, *CheckUserExistsRequest) (*CheckUserExistsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CheckUserExists not implemented")
 }
 func (UnimplementedUserServiceServer) ReadUserWithCredentials(context.Context, *ReadUserWithCredentialsRequest) (*UserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadUserWithCredentials not implemented")
@@ -203,20 +203,20 @@ func _UserService_ReadUser_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserService_ReadUserWithEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReadUserWithEmailRequest)
+func _UserService_CheckUserExists_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CheckUserExistsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserServiceServer).ReadUserWithEmail(ctx, in)
+		return srv.(UserServiceServer).CheckUserExists(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: UserService_ReadUserWithEmail_FullMethodName,
+		FullMethod: UserService_CheckUserExists_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).ReadUserWithEmail(ctx, req.(*ReadUserWithEmailRequest))
+		return srv.(UserServiceServer).CheckUserExists(ctx, req.(*CheckUserExistsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -291,8 +291,8 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _UserService_ReadUser_Handler,
 		},
 		{
-			MethodName: "ReadUserWithEmail",
-			Handler:    _UserService_ReadUserWithEmail_Handler,
+			MethodName: "CheckUserExists",
+			Handler:    _UserService_CheckUserExists_Handler,
 		},
 		{
 			MethodName: "ReadUserWithCredentials",

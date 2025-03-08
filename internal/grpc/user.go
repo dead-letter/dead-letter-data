@@ -33,13 +33,13 @@ func (s *UserServiceServer) ReadUser(ctx context.Context, req *pb.ReadUserReques
 	return pbconv.ProtoFromUser(u), nil
 }
 
-func (s *UserServiceServer) ReadUserWithEmailRequest(ctx context.Context, req *pb.ReadUserWithEmailRequest) (*pb.UserResponse, error) {
-	u, err := s.UserService.ReadWithEmail(ctx, req.Email)
+func (s *UserServiceServer) CheckUserExists(ctx context.Context, req *pb.CheckUserExistsRequest) (*pb.CheckUserExistsResponse, error) {
+	exists, err := s.UserService.ExistsWithEmail(ctx, req.Email)
 	if err != nil {
 		return nil, err
 	}
 
-	return pbconv.ProtoFromUser(u), nil
+	return &pb.CheckUserExistsResponse{Exists: exists}, nil
 }
 
 func (s *UserServiceServer) ReadUserWithCredentialsRequest(ctx context.Context, req *pb.ReadUserWithCredentialsRequest) (*pb.UserResponse, error) {
