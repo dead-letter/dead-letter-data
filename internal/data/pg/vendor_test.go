@@ -18,8 +18,7 @@ func TestVendorService(t *testing.T) {
 	ctx := context.Background()
 
 	testEmail := "test@email.com"
-	validPassword := "super_secret_password"
-	//nonExistantID := uuid.FromStringOrNil("00000000-0000-0000-0000-000000000000")
+	validPassword := []byte("super_secret_password")
 
 	var testUser *data.User
 	var testVendor *data.Vendor

@@ -16,7 +16,7 @@ type UserServiceServer struct {
 }
 
 func (s *UserServiceServer) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.UserResponse, error) {
-	u, err := s.UserService.Create(ctx, req.Email, req.Password)
+	u, err := s.UserService.Create(ctx, req.Email, req.PasswordHash)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (s *UserServiceServer) ReadUserWithEmailRequest(ctx context.Context, req *p
 }
 
 func (s *UserServiceServer) ReadUserWithCredentialsRequest(ctx context.Context, req *pb.ReadUserWithCredentialsRequest) (*pb.UserResponse, error) {
-	u, err := s.UserService.ReadWithCredentials(ctx, req.Email, req.Password)
+	u, err := s.UserService.ReadWithCredentials(ctx, req.Email, req.PasswordHash)
 	if err != nil {
 		return nil, err
 	}

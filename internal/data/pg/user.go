@@ -1,10 +1,10 @@
 package pg
 
 import (
+	"bytes"
 	"context"
 	"errors"
 
-	"github.com/alexedwards/argon2id"
 	"github.com/dead-letter/dead-letter-data/internal/data"
 	"github.com/dead-letter/dead-letter-data/internal/uuid"
 	"github.com/jackc/pgerrcode"
@@ -16,15 +16,12 @@ type UserService struct {
 	Pool *pgxpool.Pool
 }
 
-func (s *UserService) Create(ctx context.Context, email, password string) (*data.User, error) {
-	hash, err := argon2id.CreateHash(password, argon2id.DefaultParams)
-	if err != nil {
-		return nil, err
-	}
+var _ data.UserService = (*UserService)(nil)
 
+func (s *UserService) Create(ctx context.Context, email string, passwordHash []byte) (*data.User, error) {
 	u := data.User{
 		Email:        email,
-		PasswordHash: []byte(hash),
+		PasswordHash: passwordHash,
 	}
 
 	sql := `
@@ -34,7 +31,7 @@ func (s *UserService) Create(ctx context.Context, email, password string) (*data
 
 	args := []any{u.Email, u.PasswordHash}
 
-	err = s.Pool.QueryRow(ctx, sql, args...).Scan(
+	err := s.Pool.QueryRow(ctx, sql, args...).Scan(
 		&u.ID,
 		&u.Version,
 		&u.CreatedAt,
@@ -103,17 +100,13 @@ func (s *UserService) ReadWithEmail(ctx context.Context, email string) (*data.Us
 	return &u, nil
 }
 
-func (s *UserService) ReadWithCredentials(ctx context.Context, email, password string) (*data.User, error) {
+func (s *UserService) ReadWithCredentials(ctx context.Context, email string, passwordHash []byte) (*data.User, error) {
 	u, err := s.ReadWithEmail(ctx, email)
 	if err != nil {
 		return nil, err
 	}
 
-	match, err := argon2id.ComparePasswordAndHash(password, string(u.PasswordHash))
-	if err != nil {
-		return nil, err
-	}
-	if !match {
+	if !bytes.Equal(passwordHash, u.PasswordHash) {
 		return nil, data.ErrInvalidCredentials
 	}
 

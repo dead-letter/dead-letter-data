@@ -26,7 +26,7 @@ func UserFromProto(req *pb.UpdateUserRequest) (*data.User, error) {
 		ID:           id,
 		Version:      req.Version,
 		Email:        req.Email,
-		PasswordHash: []byte(req.PasswordHash),
+		PasswordHash: req.PasswordHash,
 	}
 
 	return u, nil

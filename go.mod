@@ -3,7 +3,6 @@ module github.com/dead-letter/dead-letter-data
 go 1.24.0
 
 require (
-	github.com/alexedwards/argon2id v1.0.0
 	github.com/gofrs/uuid/v5 v5.3.1
 	github.com/jackc/pgerrcode v0.0.0-20240316143900-6e2875d9b438
 	github.com/jackc/pgx-gofrs-uuid v0.0.0-20230224015001-1d428863c2e2

@@ -21,8 +21,8 @@ func TestUserService(t *testing.T) {
 	updatedEmail := "updated@gmail.com"
 	newEmail := "new@email.com"
 	nonExistantEmail := "unknown@email.com"
-	validPassword := "super_secret_password"
-	incorrectPassword := "incorrect_password"
+	validPassword := []byte("super_secret_password")
+	incorrectPassword := []byte("incorrect_password")
 	nonExistantID := uuid.Nil
 
 	var testUser *data.User

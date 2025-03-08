@@ -28,7 +28,7 @@ audit:
 .PHONY: test/check
 test/check:
 	@docker info > /dev/null 2>&1 || (echo "docker is not running"; exit 1)
-	@docker compose ps -q pgtestdb | grep -q . || (echo -e "pgtestdb container is not runnning\nrun: docker compose up -d"; exit 1)
+	@docker compose ps -q testdb | grep -q . || (echo -e "testdb container is not runnning\nrun: docker compose up -d"; exit 1)
 
 ## test: run verbose tests
 .PHONY: test
