@@ -4,8 +4,9 @@ import (
 	"context"
 
 	"github.com/dead-letter/dead-letter-data/internal/data"
+	"github.com/dead-letter/dead-letter-data/internal/pbconv"
+	"github.com/dead-letter/dead-letter-data/internal/uuid"
 	"github.com/dead-letter/dead-letter-data/pkg/pb"
-	"github.com/gofrs/uuid/v5"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -20,7 +21,7 @@ func (s *UserServiceServer) CreateUser(ctx context.Context, req *pb.CreateUserRe
 		return nil, err
 	}
 
-	return u.Proto(), nil
+	return pbconv.ProtoFromUser(u), nil
 }
 
 func (s *UserServiceServer) ReadUser(ctx context.Context, req *pb.ReadUserRequest) (*pb.UserResponse, error) {
@@ -29,7 +30,7 @@ func (s *UserServiceServer) ReadUser(ctx context.Context, req *pb.ReadUserReques
 		return nil, err
 	}
 
-	return u.Proto(), nil
+	return pbconv.ProtoFromUser(u), nil
 }
 
 func (s *UserServiceServer) ReadUserWithEmailRequest(ctx context.Context, req *pb.ReadUserWithEmailRequest) (*pb.UserResponse, error) {
@@ -38,7 +39,7 @@ func (s *UserServiceServer) ReadUserWithEmailRequest(ctx context.Context, req *p
 		return nil, err
 	}
 
-	return u.Proto(), nil
+	return pbconv.ProtoFromUser(u), nil
 }
 
 func (s *UserServiceServer) ReadUserWithCredentialsRequest(ctx context.Context, req *pb.ReadUserWithCredentialsRequest) (*pb.UserResponse, error) {
@@ -47,11 +48,11 @@ func (s *UserServiceServer) ReadUserWithCredentialsRequest(ctx context.Context, 
 		return nil, err
 	}
 
-	return u.Proto(), nil
+	return pbconv.ProtoFromUser(u), nil
 }
 
 func (s *UserServiceServer) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UserResponse, error) {
-	u, err := data.UserFromProto(req)
+	u, err := pbconv.UserFromProto(req)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +62,7 @@ func (s *UserServiceServer) UpdateUser(ctx context.Context, req *pb.UpdateUserRe
 		return nil, err
 	}
 
-	return u.Proto(), nil
+	return pbconv.ProtoFromUser(u), nil
 }
 
 func (s *UserServiceServer) DeleteUser(ctx context.Context, req *pb.DeleteUserRequest) (*emptypb.Empty, error) {

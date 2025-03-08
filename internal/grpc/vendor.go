@@ -4,8 +4,9 @@ import (
 	"context"
 
 	"github.com/dead-letter/dead-letter-data/internal/data"
+	"github.com/dead-letter/dead-letter-data/internal/pbconv"
+	"github.com/dead-letter/dead-letter-data/internal/uuid"
 	"github.com/dead-letter/dead-letter-data/pkg/pb"
-	"github.com/gofrs/uuid/v5"
 )
 
 type VendorServiceServer struct {
@@ -19,7 +20,7 @@ func (s *VendorServiceServer) CreateVendor(ctx context.Context, req *pb.CreateVe
 		return nil, err
 	}
 
-	return v.Proto(), nil
+	return pbconv.ProtoFromVendor(v), nil
 }
 
 func (s *VendorServiceServer) ReadVendorRequest(ctx context.Context, req *pb.ReadVendorRequest) (*pb.VendorResponse, error) {
@@ -28,11 +29,11 @@ func (s *VendorServiceServer) ReadVendorRequest(ctx context.Context, req *pb.Rea
 		return nil, err
 	}
 
-	return v.Proto(), nil
+	return pbconv.ProtoFromVendor(v), nil
 }
 
 func (s *VendorServiceServer) UpdateVendor(ctx context.Context, req *pb.UpdateVendorRequest) (*pb.VendorResponse, error) {
-	v, err := data.VendorFromProto(req)
+	v, err := pbconv.VendorFromProto(req)
 	if err != nil {
 		return nil, err
 	}
@@ -42,5 +43,5 @@ func (s *VendorServiceServer) UpdateVendor(ctx context.Context, req *pb.UpdateVe
 		return nil, err
 	}
 
-	return v.Proto(), nil
+	return pbconv.ProtoFromVendor(v), nil
 }

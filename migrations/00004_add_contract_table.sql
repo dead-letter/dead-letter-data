@@ -2,6 +2,7 @@
 -- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS contract_ (
 	id_ uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+	version_ integer NOT NULL DEFAULT 1,
 	created_at_ TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 	expiry_ TIMESTAMPTZ,
 	rider_id_ uuid REFERENCES rider_(id_) ON DELETE CASCADE,

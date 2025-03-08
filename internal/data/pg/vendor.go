@@ -5,7 +5,7 @@ import (
 	"errors"
 
 	"github.com/dead-letter/dead-letter-data/internal/data"
-	"github.com/gofrs/uuid/v5"
+	"github.com/dead-letter/dead-letter-data/internal/uuid"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"

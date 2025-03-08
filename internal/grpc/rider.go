@@ -4,8 +4,9 @@ import (
 	"context"
 
 	"github.com/dead-letter/dead-letter-data/internal/data"
+	"github.com/dead-letter/dead-letter-data/internal/pbconv"
+	"github.com/dead-letter/dead-letter-data/internal/uuid"
 	"github.com/dead-letter/dead-letter-data/pkg/pb"
-	"github.com/gofrs/uuid/v5"
 )
 
 type RiderServiceServer struct {
@@ -19,7 +20,7 @@ func (s *RiderServiceServer) CreateRider(ctx context.Context, req *pb.CreateRide
 		return nil, err
 	}
 
-	return r.Proto(), nil
+	return pbconv.ProtoFromRider(r), nil
 }
 
 func (s *RiderServiceServer) ReadRiderRequest(ctx context.Context, req *pb.ReadRiderRequest) (*pb.RiderResponse, error) {
@@ -28,11 +29,11 @@ func (s *RiderServiceServer) ReadRiderRequest(ctx context.Context, req *pb.ReadR
 		return nil, err
 	}
 
-	return r.Proto(), nil
+	return pbconv.ProtoFromRider(r), nil
 }
 
 func (s *RiderServiceServer) UpdateRider(ctx context.Context, req *pb.UpdateRiderRequest) (*pb.RiderResponse, error) {
-	r, err := data.RiderFromProto(req)
+	r, err := pbconv.RiderFromProto(req)
 	if err != nil {
 		return nil, err
 	}
@@ -42,5 +43,5 @@ func (s *RiderServiceServer) UpdateRider(ctx context.Context, req *pb.UpdateRide
 		return nil, err
 	}
 
-	return r.Proto(), nil
+	return pbconv.ProtoFromRider(r), nil
 }

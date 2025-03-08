@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/dead-letter/dead-letter-data/internal/data"
-	"github.com/gofrs/uuid/v5"
+	"github.com/dead-letter/dead-letter-data/internal/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -23,7 +23,7 @@ func TestUserService(t *testing.T) {
 	nonExistantEmail := "unknown@email.com"
 	validPassword := "super_secret_password"
 	incorrectPassword := "incorrect_password"
-	nonExistantID := uuid.FromStringOrNil("00000000-0000-0000-0000-000000000000")
+	nonExistantID := uuid.Nil
 
 	var testUser *data.User
 	var err error
