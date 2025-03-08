@@ -47,8 +47,9 @@ func main() {
 	db.Close()
 
 	models := &data.Models{
-		User:  pg.NewUserModel(pool),
-		Rider: pg.NewRiderModel(pool),
+		User:   pg.NewUserModel(pool),
+		Rider:  pg.NewRiderModel(pool),
+		Vendor: pg.NewVendorModel(pool),
 	}
 
 	srv := &grpc.Server{

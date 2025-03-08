@@ -32,8 +32,9 @@ func testModels(t *testing.T) (*data.Models, *pgxpool.Pool) {
 	assert.NoError(t, err)
 
 	models := data.Models{
-		User:  NewUserModel(pool),
-		Rider: NewRiderModel(pool),
+		User:   NewUserModel(pool),
+		Rider:  NewRiderModel(pool),
+		Vendor: NewVendorModel(pool),
 	}
 
 	return &models, pool

@@ -13,6 +13,7 @@ var (
 )
 
 type Models struct {
-	User  UserModel
-	Rider RiderModel
+	User   UserModel
+	Rider  RiderModel
+	Vendor VendorModel
 }
