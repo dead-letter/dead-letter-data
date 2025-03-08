@@ -2,68 +2,61 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log/slog"
-	"net"
 	"os"
 	"time"
 
 	"github.com/dead-letter/dead-letter-data/internal/data"
 	"github.com/dead-letter/dead-letter-data/internal/data/pg"
-	"github.com/dead-letter/dead-letter-data/internal/rpc"
+	"github.com/dead-letter/dead-letter-data/internal/grpc"
 	"github.com/dead-letter/dead-letter-data/migrations"
-	"github.com/dead-letter/dead-letter-data/pkg/pb"
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/lmittmann/tint"
-	"google.golang.org/grpc"
 )
 
-var models *data.Models
+type config struct {
+	dev  bool
+	port int
+	dsn  string
+}
 
 func main() {
-	var dev bool
+	var cfg config
 
-	// CLI flags
-	flag.BoolVar(&dev, "dev", false, "Development mode")
+	// Default for prod
+	flag.BoolVar(&cfg.dev, "dev", false, "Development mode")
+	flag.IntVar(&cfg.port, "port", 50051, "API server port")
+	flag.StringVar(&cfg.dsn, "dsn", os.Getenv("DATABASE_URL"), "PostgreSQL DSN")
 	flag.Parse()
 
-	// Read environment
-	dsn := os.Getenv("DATABASE_URL")
-
-	// Logger
-	h := newSlogHandler(dev)
+	h := newSlogHandler(cfg.dev)
 	logger := slog.New(h)
 
-	// Open database pool
-	pool, err := pg.OpenPool(dsn)
+	pool, err := pg.OpenPool(cfg.dsn)
 	if err != nil {
 		fatal(logger, err)
 	}
 	defer pool.Close()
 
-	// Run migrations
 	db := stdlib.OpenDBFromPool(pool)
 	migrations.Up(db)
-	if dev {
+	if cfg.dev {
 		migrations.Reset(db)
 	}
 	db.Close()
 
-	// Create models
-	models = pg.NewModels(pool)
-
-	// Create gRPC server
-	grpcServer := grpc.NewServer()
-	pb.RegisterUserServiceServer(grpcServer, rpc.NewUserServiceServer(models))
-	pb.RegisterRiderServiceServer(grpcServer, rpc.NewRiderServiceServer(models))
-
-	// Run server
-	lis, err := net.Listen("tcp", ":50051")
-	if err != nil {
-		fatal(logger, err)
+	models := &data.Models{
+		User:  pg.NewUserModel(pool),
+		Rider: pg.NewRiderModel(pool),
 	}
 
-	logger.Info("starting gRPC server", slog.String("addr", lis.Addr().String()))
-	grpcServer.Serve(lis)
+	srv := &grpc.Server{
+		Addr:   fmt.Sprintf(":%d", cfg.port),
+		Models: models,
+	}
+
+	err = srv.ListenAndServe()
 	if err != nil {
 		fatal(logger, err)
 	}

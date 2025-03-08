@@ -31,7 +31,10 @@ func testModels(t *testing.T) (*data.Models, *pgxpool.Pool) {
 	pool, err := OpenPool(c.URL())
 	assert.NoError(t, err)
 
-	models := NewModels(pool)
+	models := data.Models{
+		User:  NewUserModel(pool),
+		Rider: NewRiderModel(pool),
+	}
 
-	return models, pool
+	return &models, pool
 }
