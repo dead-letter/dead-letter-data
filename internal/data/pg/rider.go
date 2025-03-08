@@ -11,17 +11,11 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type RiderModel struct {
-	pool *pgxpool.Pool
+type RiderService struct {
+	Pool *pgxpool.Pool
 }
 
-func NewRiderModel(pool *pgxpool.Pool) RiderModel {
-	return RiderModel{
-		pool: pool,
-	}
-}
-
-func (s RiderModel) Create(id uuid.UUID) (*data.Rider, error) {
+func (s *RiderService) Create(ctx context.Context, id uuid.UUID) (*data.Rider, error) {
 	r := data.Rider{
 		ID: id,
 	}
@@ -31,10 +25,7 @@ func (s RiderModel) Create(id uuid.UUID) (*data.Rider, error) {
 		VALUES($1)
 		RETURNING version_;`
 
-	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
-	defer cancel()
-
-	err := s.pool.QueryRow(ctx, sql, r.ID).Scan(
+	err := s.Pool.QueryRow(ctx, sql, r.ID).Scan(
 		&r.Version,
 	)
 	if err != nil {
@@ -44,17 +35,14 @@ func (s RiderModel) Create(id uuid.UUID) (*data.Rider, error) {
 	return &r, nil
 }
 
-func (s RiderModel) Read(id uuid.UUID) (*data.Rider, error) {
+func (s *RiderService) Read(ctx context.Context, id uuid.UUID) (*data.Rider, error) {
 	var r data.Rider
 
 	sql := `
 		SELECT id_, version_
 		FROM rider_ WHERE id_ = $1;`
 
-	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
-	defer cancel()
-
-	err := s.pool.QueryRow(ctx, sql, id).Scan(
+	err := s.Pool.QueryRow(ctx, sql, id).Scan(
 		&r.ID,
 		&r.Version,
 	)
@@ -70,7 +58,7 @@ func (s RiderModel) Read(id uuid.UUID) (*data.Rider, error) {
 	return &r, nil
 }
 
-func (s RiderModel) Update(r *data.Rider) error {
+func (s *RiderService) Update(ctx context.Context, r *data.Rider) error {
 	sql := `
 		UPDATE rider_ 
         SET version_ = version_ + 1
@@ -82,10 +70,7 @@ func (s RiderModel) Update(r *data.Rider) error {
 		r.Version,
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
-	defer cancel()
-
-	err := s.pool.QueryRow(ctx, sql, args...).Scan(
+	err := s.Pool.QueryRow(ctx, sql, args...).Scan(
 		&r.Version,
 	)
 	if err != nil {

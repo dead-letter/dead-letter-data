@@ -1,14 +1,16 @@
 package data
 
 import (
+	"context"
+
 	"github.com/dead-letter/dead-letter-data/pkg/pb"
 	"github.com/gofrs/uuid/v5"
 )
 
-type RiderModel interface {
-	Create(ID uuid.UUID) (*Rider, error)
-	Read(ID uuid.UUID) (*Rider, error)
-	Update(Rider *Rider) error
+type RiderService interface {
+	Create(ctx context.Context, id uuid.UUID) (*Rider, error)
+	Read(ctx context.Context, id uuid.UUID) (*Rider, error)
+	Update(ctx context.Context, r *Rider) error
 }
 
 type Rider struct {

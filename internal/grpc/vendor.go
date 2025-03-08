@@ -10,43 +10,37 @@ import (
 
 type VendorServiceServer struct {
 	pb.UnimplementedVendorServiceServer
-	models *data.Models
-}
-
-func NewVendorServiceServer(models *data.Models) *VendorServiceServer {
-	return &VendorServiceServer{
-		models: models,
-	}
+	VendorService data.VendorService
 }
 
 func (s *VendorServiceServer) CreateVendor(ctx context.Context, req *pb.CreateVendorRequest) (*pb.VendorResponse, error) {
-	r, err := s.models.Vendor.Create(uuid.FromStringOrNil(req.Id))
+	v, err := s.VendorService.Create(ctx, uuid.FromStringOrNil(req.Id))
 	if err != nil {
 		return nil, err
 	}
 
-	return r.Proto(), nil
+	return v.Proto(), nil
 }
 
 func (s *VendorServiceServer) ReadVendorRequest(ctx context.Context, req *pb.ReadVendorRequest) (*pb.VendorResponse, error) {
-	r, err := s.models.Vendor.Read(uuid.FromStringOrNil(req.Id))
+	v, err := s.VendorService.Read(ctx, uuid.FromStringOrNil(req.Id))
 	if err != nil {
 		return nil, err
 	}
 
-	return r.Proto(), nil
+	return v.Proto(), nil
 }
 
 func (s *VendorServiceServer) UpdateVendor(ctx context.Context, req *pb.UpdateVendorRequest) (*pb.VendorResponse, error) {
-	r, err := data.VendorFromProto(req)
+	v, err := data.VendorFromProto(req)
 	if err != nil {
 		return nil, err
 	}
 
-	err = s.models.Vendor.Update(r)
+	err = s.VendorService.Update(ctx, v)
 	if err != nil {
 		return nil, err
 	}
 
-	return r.Proto(), nil
+	return v.Proto(), nil
 }

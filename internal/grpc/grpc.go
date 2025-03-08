@@ -9,22 +9,29 @@ import (
 )
 
 type Server struct {
-	Addr   string
-	Models *data.Models
+	Addr          string
+	UserService   data.UserService
+	RiderService  data.RiderService
+	VendorService data.VendorService
 }
 
-func (s *Server) ListenAndServe() error {
-	grpcServer := grpc.NewServer()
+func (srv *Server) ListenAndServe() error {
+	s := grpc.NewServer()
 
-	pb.RegisterUserServiceServer(grpcServer, NewUserServiceServer(s.Models))
-	pb.RegisterRiderServiceServer(grpcServer, NewRiderServiceServer(s.Models))
+	userServiceServer := &UserServiceServer{UserService: srv.UserService}
+	riderServiceServer := &RiderServiceServer{RiderService: srv.RiderService}
+	vendorServiceServer := &VendorServiceServer{VendorService: srv.VendorService}
 
-	lis, err := net.Listen("tcp", s.Addr)
+	pb.RegisterUserServiceServer(s, userServiceServer)
+	pb.RegisterRiderServiceServer(s, riderServiceServer)
+	pb.RegisterVendorServiceServer(s, vendorServiceServer)
+
+	lis, err := net.Listen("tcp", srv.Addr)
 	if err != nil {
 		return err
 	}
 
-	err = grpcServer.Serve(lis)
+	err = s.Serve(lis)
 	if err != nil {
 		return err
 	}

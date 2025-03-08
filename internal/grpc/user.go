@@ -11,17 +11,11 @@ import (
 
 type UserServiceServer struct {
 	pb.UnimplementedUserServiceServer
-	models *data.Models
-}
-
-func NewUserServiceServer(models *data.Models) *UserServiceServer {
-	return &UserServiceServer{
-		models: models,
-	}
+	UserService data.UserService
 }
 
 func (s *UserServiceServer) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.UserResponse, error) {
-	u, err := s.models.User.Create(req.Email, req.Password)
+	u, err := s.UserService.Create(ctx, req.Email, req.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -30,7 +24,7 @@ func (s *UserServiceServer) CreateUser(ctx context.Context, req *pb.CreateUserRe
 }
 
 func (s *UserServiceServer) ReadUser(ctx context.Context, req *pb.ReadUserRequest) (*pb.UserResponse, error) {
-	u, err := s.models.User.Read(uuid.FromStringOrNil(req.Id))
+	u, err := s.UserService.Read(ctx, uuid.FromStringOrNil(req.Id))
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +33,7 @@ func (s *UserServiceServer) ReadUser(ctx context.Context, req *pb.ReadUserReques
 }
 
 func (s *UserServiceServer) ReadUserWithEmailRequest(ctx context.Context, req *pb.ReadUserWithEmailRequest) (*pb.UserResponse, error) {
-	u, err := s.models.User.ReadWithEmail(req.Email)
+	u, err := s.UserService.ReadWithEmail(ctx, req.Email)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +42,7 @@ func (s *UserServiceServer) ReadUserWithEmailRequest(ctx context.Context, req *p
 }
 
 func (s *UserServiceServer) ReadUserWithCredentialsRequest(ctx context.Context, req *pb.ReadUserWithCredentialsRequest) (*pb.UserResponse, error) {
-	u, err := s.models.User.ReadWithCredentials(req.Email, req.Password)
+	u, err := s.UserService.ReadWithCredentials(ctx, req.Email, req.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +56,7 @@ func (s *UserServiceServer) UpdateUser(ctx context.Context, req *pb.UpdateUserRe
 		return nil, err
 	}
 
-	err = s.models.User.Update(u)
+	err = s.UserService.Update(ctx, u)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +70,7 @@ func (s *UserServiceServer) DeleteUser(ctx context.Context, req *pb.DeleteUserRe
 		return nil, err
 	}
 
-	err = s.models.User.Delete(userID)
+	err = s.UserService.Delete(ctx, userID)
 	if err != nil {
 		return nil, err
 	}

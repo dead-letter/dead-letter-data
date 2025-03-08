@@ -1,14 +1,16 @@
 package data
 
 import (
+	"context"
+
 	"github.com/dead-letter/dead-letter-data/pkg/pb"
 	"github.com/gofrs/uuid/v5"
 )
 
-type VendorModel interface {
-	Create(ID uuid.UUID) (*Vendor, error)
-	Read(ID uuid.UUID) (*Vendor, error)
-	Update(Vendor *Vendor) error
+type VendorService interface {
+	Create(ctx context.Context, id uuid.UUID) (*Vendor, error)
+	Read(ctx context.Context, id uuid.UUID) (*Vendor, error)
+	Update(ctx context.Context, v *Vendor) error
 }
 
 type Vendor struct {
@@ -16,10 +18,10 @@ type Vendor struct {
 	Version int32
 }
 
-func (r *Vendor) Proto() *pb.VendorResponse {
+func (v *Vendor) Proto() *pb.VendorResponse {
 	return &pb.VendorResponse{
-		Id:      r.ID.String(),
-		Version: r.Version,
+		Id:      v.ID.String(),
+		Version: v.Version,
 	}
 }
 
@@ -29,10 +31,10 @@ func VendorFromProto(req *pb.UpdateVendorRequest) (*Vendor, error) {
 		return nil, err
 	}
 
-	r := &Vendor{
+	v := &Vendor{
 		ID:      id,
 		Version: req.Version,
 	}
 
-	return r, nil
+	return v, nil
 }

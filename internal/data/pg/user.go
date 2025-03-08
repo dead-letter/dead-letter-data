@@ -12,15 +12,11 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type UserModel struct {
-	pool *pgxpool.Pool
+type UserService struct {
+	Pool *pgxpool.Pool
 }
 
-func NewUserModel(pool *pgxpool.Pool) UserModel {
-	return UserModel{pool: pool}
-}
-
-func (s UserModel) Create(email, password string) (*data.User, error) {
+func (s *UserService) Create(ctx context.Context, email, password string) (*data.User, error) {
 	hash, err := argon2id.CreateHash(password, argon2id.DefaultParams)
 	if err != nil {
 		return nil, err
@@ -38,10 +34,7 @@ func (s UserModel) Create(email, password string) (*data.User, error) {
 
 	args := []any{u.Email, u.PasswordHash}
 
-	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
-	defer cancel()
-
-	err = s.pool.QueryRow(ctx, sql, args...).Scan(
+	err = s.Pool.QueryRow(ctx, sql, args...).Scan(
 		&u.ID,
 		&u.Version,
 		&u.CreatedAt,
@@ -58,17 +51,14 @@ func (s UserModel) Create(email, password string) (*data.User, error) {
 	return &u, nil
 }
 
-func (s UserModel) Read(id uuid.UUID) (*data.User, error) {
+func (s *UserService) Read(ctx context.Context, id uuid.UUID) (*data.User, error) {
 	var u data.User
 
 	sql := `
 		SELECT id_, version_, created_at_, email_, password_hash_
 		FROM user_ WHERE id_ = $1;`
 
-	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
-	defer cancel()
-
-	err := s.pool.QueryRow(ctx, sql, id).Scan(
+	err := s.Pool.QueryRow(ctx, sql, id).Scan(
 		&u.ID,
 		&u.Version,
 		&u.CreatedAt,
@@ -87,17 +77,14 @@ func (s UserModel) Read(id uuid.UUID) (*data.User, error) {
 	return &u, nil
 }
 
-func (s UserModel) ReadWithEmail(email string) (*data.User, error) {
+func (s *UserService) ReadWithEmail(ctx context.Context, email string) (*data.User, error) {
 	var u data.User
 
 	sql := `
 		SELECT id_, version_, created_at_, email_, password_hash_
 		FROM user_ WHERE email_ = $1;`
 
-	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
-	defer cancel()
-
-	err := s.pool.QueryRow(ctx, sql, email).Scan(
+	err := s.Pool.QueryRow(ctx, sql, email).Scan(
 		&u.ID,
 		&u.Version,
 		&u.CreatedAt,
@@ -116,8 +103,8 @@ func (s UserModel) ReadWithEmail(email string) (*data.User, error) {
 	return &u, nil
 }
 
-func (s UserModel) ReadWithCredentials(email, password string) (*data.User, error) {
-	u, err := s.ReadWithEmail(email)
+func (s *UserService) ReadWithCredentials(ctx context.Context, email, password string) (*data.User, error) {
+	u, err := s.ReadWithEmail(ctx, email)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +120,7 @@ func (s UserModel) ReadWithCredentials(email, password string) (*data.User, erro
 	return u, nil
 }
 
-func (s UserModel) Update(u *data.User) error {
+func (s *UserService) Update(ctx context.Context, u *data.User) error {
 	sql := `
 		UPDATE user_ 
         SET email_ = $1, password_hash_ = $2, version_ = version_ + 1
@@ -147,10 +134,7 @@ func (s UserModel) Update(u *data.User) error {
 		u.Version,
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
-	defer cancel()
-
-	err := s.pool.QueryRow(ctx, sql, args...).Scan(
+	err := s.Pool.QueryRow(ctx, sql, args...).Scan(
 		&u.Version,
 	)
 	if err != nil {
@@ -167,15 +151,12 @@ func (s UserModel) Update(u *data.User) error {
 	return nil
 }
 
-func (s UserModel) Delete(id uuid.UUID) error {
+func (s *UserService) Delete(ctx context.Context, id uuid.UUID) error {
 	sql := `
 		DELETE FROM user_
 		WHERE id_ = $1;`
 
-	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
-	defer cancel()
-
-	res, err := s.pool.Exec(ctx, sql, id)
+	res, err := s.Pool.Exec(ctx, sql, id)
 	if err != nil {
 		return err
 	}

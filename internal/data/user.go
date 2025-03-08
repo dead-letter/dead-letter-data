@@ -1,6 +1,7 @@
 package data
 
 import (
+	"context"
 	"time"
 
 	"github.com/dead-letter/dead-letter-data/pkg/pb"
@@ -8,13 +9,13 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-type UserModel interface {
-	Create(email, password string) (*User, error)
-	Read(id uuid.UUID) (*User, error)
-	ReadWithEmail(email string) (*User, error)
-	ReadWithCredentials(email, password string) (*User, error)
-	Update(user *User) error
-	Delete(id uuid.UUID) error
+type UserService interface {
+	Create(ctx context.Context, email, password string) (*User, error)
+	Read(ctx context.Context, id uuid.UUID) (*User, error)
+	ReadWithEmail(ctx context.Context, email string) (*User, error)
+	ReadWithCredentials(ctx context.Context, email, password string) (*User, error)
+	Update(ctx context.Context, user *User) error
+	Delete(ctx context.Context, id uuid.UUID) error
 }
 
 type User struct {

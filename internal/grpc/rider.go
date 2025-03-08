@@ -10,17 +10,11 @@ import (
 
 type RiderServiceServer struct {
 	pb.UnimplementedRiderServiceServer
-	models *data.Models
-}
-
-func NewRiderServiceServer(models *data.Models) *RiderServiceServer {
-	return &RiderServiceServer{
-		models: models,
-	}
+	RiderService data.RiderService
 }
 
 func (s *RiderServiceServer) CreateRider(ctx context.Context, req *pb.CreateRiderRequest) (*pb.RiderResponse, error) {
-	r, err := s.models.Rider.Create(uuid.FromStringOrNil(req.Id))
+	r, err := s.RiderService.Create(ctx, uuid.FromStringOrNil(req.Id))
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +23,7 @@ func (s *RiderServiceServer) CreateRider(ctx context.Context, req *pb.CreateRide
 }
 
 func (s *RiderServiceServer) ReadRiderRequest(ctx context.Context, req *pb.ReadRiderRequest) (*pb.RiderResponse, error) {
-	r, err := s.models.Rider.Read(uuid.FromStringOrNil(req.Id))
+	r, err := s.RiderService.Read(ctx, uuid.FromStringOrNil(req.Id))
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +37,7 @@ func (s *RiderServiceServer) UpdateRider(ctx context.Context, req *pb.UpdateRide
 		return nil, err
 	}
 
-	err = s.models.Rider.Update(r)
+	err = s.RiderService.Update(ctx, r)
 	if err != nil {
 		return nil, err
 	}

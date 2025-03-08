@@ -7,10 +7,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/dead-letter/dead-letter-data/internal/data"
 	"github.com/dead-letter/dead-letter-data/internal/data/pg"
 	"github.com/dead-letter/dead-letter-data/internal/grpc"
 	"github.com/dead-letter/dead-letter-data/migrations"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/lmittmann/tint"
 )
@@ -39,22 +39,16 @@ func main() {
 	}
 	defer pool.Close()
 
-	db := stdlib.OpenDBFromPool(pool)
-	migrations.Up(db)
-	if cfg.dev {
-		migrations.Reset(db)
-	}
-	db.Close()
-
-	models := &data.Models{
-		User:   pg.NewUserModel(pool),
-		Rider:  pg.NewRiderModel(pool),
-		Vendor: pg.NewVendorModel(pool),
+	err = runMigrations(pool, cfg.dev)
+	if err != nil {
+		fatal(logger, err)
 	}
 
 	srv := &grpc.Server{
-		Addr:   fmt.Sprintf(":%d", cfg.port),
-		Models: models,
+		Addr:          fmt.Sprintf(":%d", cfg.port),
+		UserService:   &pg.UserService{Pool: pool},
+		RiderService:  &pg.RiderService{Pool: pool},
+		VendorService: &pg.VendorService{Pool: pool},
 	}
 
 	err = srv.ListenAndServe()
@@ -75,6 +69,25 @@ func newSlogHandler(dev bool) slog.Handler {
 
 	// Production use JSON handler with default opts
 	return slog.NewJSONHandler(os.Stdout, nil)
+}
+
+func runMigrations(pool *pgxpool.Pool, reset bool) error {
+	db := stdlib.OpenDBFromPool(pool)
+	defer db.Close()
+
+	err := migrations.Up(db)
+	if err != nil {
+		return err
+	}
+
+	if reset {
+		err = migrations.Reset(db)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func fatal(logger *slog.Logger, err error) {

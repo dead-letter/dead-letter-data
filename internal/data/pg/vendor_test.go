@@ -1,6 +1,7 @@
 package pg
 
 import (
+	"context"
 	"testing"
 
 	"github.com/dead-letter/dead-letter-data/internal/data"
@@ -9,8 +10,12 @@ import (
 
 func TestVendorService(t *testing.T) {
 	t.Parallel()
-	models, pool := testModels(t)
+	pool := testPool(t)
 	defer pool.Close()
+
+	us := &UserService{pool}
+	vs := &VendorService{pool}
+	ctx := context.Background()
 
 	testEmail := "test@email.com"
 	validPassword := "super_secret_password"
@@ -23,7 +28,7 @@ func TestVendorService(t *testing.T) {
 	assert.Equal(t, "sarah", "sarah")
 
 	t.Run("TestUserCreate", func(t *testing.T) {
-		testUser, err = models.User.Create(testEmail, validPassword)
+		testUser, err = us.Create(ctx, testEmail, validPassword)
 		assert.NoError(t, err)
 		assert.NotNil(t, testUser)
 		assert.Equal(t, int32(1), testUser.Version)
@@ -31,7 +36,7 @@ func TestVendorService(t *testing.T) {
 	})
 
 	t.Run("TestCreate", func(t *testing.T) {
-		testVendor, err = models.Vendor.Create(testUser.ID)
+		testVendor, err = vs.Create(ctx, testUser.ID)
 		assert.NoError(t, err)
 		assert.NotNil(t, testVendor)
 		assert.Equal(t, int32(1), testVendor.Version)
@@ -40,7 +45,7 @@ func TestVendorService(t *testing.T) {
 
 	t.Run("TestRead", func(t *testing.T) {
 		var readVendor *data.Vendor
-		readVendor, err = models.Vendor.Read(testVendor.ID)
+		readVendor, err = vs.Read(ctx, testVendor.ID)
 		assert.NoError(t, err)
 		assert.NotNil(t, readVendor)
 		assert.Equal(t, testVendor, readVendor)
@@ -48,23 +53,23 @@ func TestVendorService(t *testing.T) {
 
 	t.Run("TestUpdate", func(t *testing.T) {
 		currentVersion := testVendor.Version
-		err = models.Vendor.Update(testVendor)
+		err = vs.Update(ctx, testVendor)
 		assert.NoError(t, err)
 		assert.NotNil(t, testVendor)
 		assert.Equal(t, currentVersion+1, testVendor.Version)
 
 		var readVendor *data.Vendor
-		readVendor, err = models.Vendor.Read(testVendor.ID)
+		readVendor, err = vs.Read(ctx, testVendor.ID)
 		assert.NoError(t, err)
 		assert.NotNil(t, readVendor)
 		assert.Equal(t, testVendor, readVendor)
 	})
 
 	t.Run("TestUserDelete", func(t *testing.T) {
-		err = models.User.Delete(testVendor.ID)
+		err = us.Delete(ctx, testVendor.ID)
 		assert.NoError(t, err)
 
-		_, err = models.Vendor.Read(testVendor.ID)
+		_, err = vs.Read(ctx, testVendor.ID)
 		assert.ErrorIs(t, err, data.ErrRecordNotFound)
 	})
 }

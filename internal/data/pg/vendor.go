@@ -11,18 +11,12 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type VendorModel struct {
-	pool *pgxpool.Pool
+type VendorService struct {
+	Pool *pgxpool.Pool
 }
 
-func NewVendorModel(pool *pgxpool.Pool) VendorModel {
-	return VendorModel{
-		pool: pool,
-	}
-}
-
-func (s VendorModel) Create(id uuid.UUID) (*data.Vendor, error) {
-	r := data.Vendor{
+func (s *VendorService) Create(ctx context.Context, id uuid.UUID) (*data.Vendor, error) {
+	v := data.Vendor{
 		ID: id,
 	}
 
@@ -31,32 +25,26 @@ func (s VendorModel) Create(id uuid.UUID) (*data.Vendor, error) {
 		VALUES($1)
 		RETURNING version_;`
 
-	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
-	defer cancel()
-
-	err := s.pool.QueryRow(ctx, sql, r.ID).Scan(
-		&r.Version,
+	err := s.Pool.QueryRow(ctx, sql, v.ID).Scan(
+		&v.Version,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	return &r, nil
+	return &v, nil
 }
 
-func (s VendorModel) Read(id uuid.UUID) (*data.Vendor, error) {
-	var r data.Vendor
+func (s *VendorService) Read(ctx context.Context, id uuid.UUID) (*data.Vendor, error) {
+	var v data.Vendor
 
 	sql := `
 		SELECT id_, version_
 		FROM vendor_ WHERE id_ = $1;`
 
-	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
-	defer cancel()
-
-	err := s.pool.QueryRow(ctx, sql, id).Scan(
-		&r.ID,
-		&r.Version,
+	err := s.Pool.QueryRow(ctx, sql, id).Scan(
+		&v.ID,
+		&v.Version,
 	)
 	if err != nil {
 		switch {
@@ -67,10 +55,10 @@ func (s VendorModel) Read(id uuid.UUID) (*data.Vendor, error) {
 		}
 	}
 
-	return &r, nil
+	return &v, nil
 }
 
-func (s VendorModel) Update(r *data.Vendor) error {
+func (s *VendorService) Update(ctx context.Context, v *data.Vendor) error {
 	sql := `
 		UPDATE vendor_ 
         SET version_ = version_ + 1
@@ -78,15 +66,12 @@ func (s VendorModel) Update(r *data.Vendor) error {
         RETURNING version_;`
 
 	args := []any{
-		r.ID,
-		r.Version,
+		v.ID,
+		v.Version,
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), ctxTimeout)
-	defer cancel()
-
-	err := s.pool.QueryRow(ctx, sql, args...).Scan(
-		&r.Version,
+	err := s.Pool.QueryRow(ctx, sql, args...).Scan(
+		&v.Version,
 	)
 	if err != nil {
 		switch {
