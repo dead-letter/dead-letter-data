@@ -24,8 +24,6 @@ func TestRiderService(t *testing.T) {
 	var testRider *data.Rider
 	var err error
 
-	assert.Equal(t, "sarah", "sarah")
-
 	t.Run("TestUserCreate", func(t *testing.T) {
 		testUser, err = us.Create(ctx, testEmail, validPassword)
 		assert.NoError(t, err)
