@@ -11,8 +11,8 @@ import (
 
 func TestUserService(t *testing.T) {
 	t.Parallel()
-	db := testDB(t)
-	defer db.Close()
+	pg := testDB(t)
+	defer pg.Close()
 
 	ctx := context.Background()
 	testEmail := "test@email.com"
@@ -27,7 +27,7 @@ func TestUserService(t *testing.T) {
 	var err error
 
 	t.Run("TestCreate", func(t *testing.T) {
-		testUser, err = db.Users.Create(ctx, testEmail, validPassword)
+		testUser, err = pg.Users.Create(ctx, testEmail, validPassword)
 		assert.NoError(t, err)
 		assert.NotNil(t, testUser)
 		assert.Equal(t, int32(1), testUser.Version)
@@ -35,56 +35,56 @@ func TestUserService(t *testing.T) {
 	})
 
 	t.Run("TestCreateDuplicateEmail", func(t *testing.T) {
-		_, err = db.Users.Create(ctx, testEmail, validPassword)
+		_, err = pg.Users.Create(ctx, testEmail, validPassword)
 		assert.ErrorIs(t, err, data.ErrDuplicateEmail)
 	})
 
 	t.Run("TestRead", func(t *testing.T) {
 		var readUser *data.User
-		readUser, err = db.Users.Read(ctx, testUser.ID)
+		readUser, err = pg.Users.Read(ctx, testUser.ID)
 		assert.NoError(t, err)
 		assert.NotNil(t, readUser)
 		assert.Equal(t, testUser, readUser)
 	})
 
 	t.Run("TestReadUnkown", func(t *testing.T) {
-		_, err = db.Users.Read(ctx, nonExistantID)
+		_, err = pg.Users.Read(ctx, nonExistantID)
 		assert.ErrorIs(t, err, data.ErrRecordNotFound)
 	})
 
 	t.Run("TestExistsWithEmail", func(t *testing.T) {
-		exists, err := db.Users.ExistsWithEmail(ctx, testEmail)
+		exists, err := pg.Users.ExistsWithEmail(ctx, testEmail)
 		assert.NoError(t, err)
 		assert.True(t, exists)
 
-		exists, err = db.Users.ExistsWithEmail(ctx, nonExistantEmail)
+		exists, err = pg.Users.ExistsWithEmail(ctx, nonExistantEmail)
 		assert.NoError(t, err)
 		assert.False(t, exists)
 	})
 
 	t.Run("TestReadWithCredentials", func(t *testing.T) {
 		var readUser *data.User
-		readUser, err = db.Users.ReadWithCredentials(ctx, testEmail, validPassword)
+		readUser, err = pg.Users.ReadWithCredentials(ctx, testEmail, validPassword)
 		assert.NoError(t, err)
 		assert.NotNil(t, readUser)
 		assert.Equal(t, testUser, readUser)
 	})
 
 	t.Run("TestReadWithIncorrectCredentials", func(t *testing.T) {
-		_, err = db.Users.ReadWithCredentials(ctx, testEmail, incorrectPassword)
+		_, err = pg.Users.ReadWithCredentials(ctx, testEmail, incorrectPassword)
 		assert.ErrorIs(t, err, data.ErrInvalidCredentials)
 	})
 
 	t.Run("TestUpdate", func(t *testing.T) {
 		testUser.Email = updatedEmail
 		currentVersion := testUser.Version
-		err = db.Users.Update(ctx, testUser)
+		err = pg.Users.Update(ctx, testUser)
 		assert.NoError(t, err)
 		assert.NotNil(t, testUser)
 		assert.Equal(t, currentVersion+1, testUser.Version)
 
 		var readUser *data.User
-		readUser, err = db.Users.Read(ctx, testUser.ID)
+		readUser, err = pg.Users.Read(ctx, testUser.ID)
 		assert.NoError(t, err)
 		assert.NotNil(t, readUser)
 		assert.Equal(t, testUser, readUser)
@@ -92,29 +92,29 @@ func TestUserService(t *testing.T) {
 
 	t.Run("TestUpdateInvalidVersion", func(t *testing.T) {
 		testUser.Version -= 1
-		err = db.Users.Update(ctx, testUser)
+		err = pg.Users.Update(ctx, testUser)
 		assert.ErrorIs(t, err, data.ErrEditConflict)
 	})
 
 	t.Run("TestUpdateDuplicateEmail", func(t *testing.T) {
 		var newUser *data.User
-		newUser, err = db.Users.Create(ctx, newEmail, validPassword)
+		newUser, err = pg.Users.Create(ctx, newEmail, validPassword)
 		assert.NoError(t, err)
 		assert.NotNil(t, newUser)
 		assert.Equal(t, newEmail, newUser.Email)
 
 		newUser.Email = testEmail
-		err = db.Users.Update(ctx, testUser)
+		err = pg.Users.Update(ctx, testUser)
 		assert.ErrorIs(t, err, data.ErrEditConflict)
 	})
 
 	t.Run("TestDelete", func(t *testing.T) {
-		err = db.Users.Delete(ctx, testUser.ID)
+		err = pg.Users.Delete(ctx, testUser.ID)
 		assert.NoError(t, err)
 	})
 
 	t.Run("TestDeleteUnkown", func(t *testing.T) {
-		err = db.Users.Delete(ctx, nonExistantID)
+		err = pg.Users.Delete(ctx, nonExistantID)
 		assert.ErrorIs(t, err, data.ErrRecordNotFound)
 	})
 }

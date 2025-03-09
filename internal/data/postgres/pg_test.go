@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func testDB(t *testing.T) *DB {
+func testDB(t *testing.T) *PostgresDB {
 	t.Helper()
 	dbconf := pgtestdb.Config{
 		DriverName: "pgx",
@@ -26,8 +26,8 @@ func testDB(t *testing.T) *DB {
 	c := pgtestdb.Custom(t, dbconf, m)
 	assert.NotEqual(t, dbconf, *c)
 
-	db, err := NewDB(c.URL())
+	pg, err := NewPostgresDB(c.URL())
 	assert.NoError(t, err)
 
-	return db
+	return pg
 }

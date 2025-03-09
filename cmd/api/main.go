@@ -33,7 +33,7 @@ func main() {
 	h := newSlogHandler(cfg.dev)
 	logger := slog.New(h)
 
-	pg, err := postgres.NewDB(cfg.dsn)
+	pg, err := postgres.NewPostgresDB(cfg.dsn)
 	if err != nil {
 		fatal(logger, err)
 	}

@@ -12,19 +12,19 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type DB struct {
+type PostgresDB struct {
 	*data.DB
 	Pool *pgxpool.Pool
 }
 
 // Create a database pool. Don't forget to Close()
-func NewDB(dsn string) (*DB, error) {
+func NewPostgresDB(dsn string) (*PostgresDB, error) {
 	pool, err := openPool(dsn)
 	if err != nil {
 		return nil, err
 	}
 
-	db := &DB{
+	pg := &PostgresDB{
 		DB: &data.DB{
 			Users:   &UserRepository{pool},
 			Riders:  &RiderRepository{pool},
@@ -33,12 +33,12 @@ func NewDB(dsn string) (*DB, error) {
 		Pool: pool,
 	}
 
-	return db, nil
+	return pg, nil
 }
 
 // Close closes all connections in the database pool
-func (db *DB) Close() {
-	db.Pool.Close()
+func (pg *PostgresDB) Close() {
+	pg.Pool.Close()
 }
 
 func openPool(dsn string) (*pgxpool.Pool, error) {

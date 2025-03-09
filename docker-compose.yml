@@ -3,7 +3,6 @@ services:
     image: postgres:15
     environment:
       POSTGRES_PASSWORD: password
-    restart: unless-stopped
     volumes:
       - type: tmpfs
         target: /var/lib/postgresql/data/
