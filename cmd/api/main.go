@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/dead-letter/dead-letter-data/internal/data/pg"
+	"github.com/dead-letter/dead-letter-data/internal/data/postgres"
 	"github.com/dead-letter/dead-letter-data/internal/grpc"
 	"github.com/dead-letter/dead-letter-data/migrations"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -33,24 +33,19 @@ func main() {
 	h := newSlogHandler(cfg.dev)
 	logger := slog.New(h)
 
-	pool, err := pg.OpenPool(cfg.dsn)
+	pg, err := postgres.NewDB(cfg.dsn)
 	if err != nil {
 		fatal(logger, err)
 	}
-	defer pool.Close()
+	defer pg.Close()
 
-	err = runMigrations(pool, cfg.dev)
+	err = runMigrations(pg.Pool, cfg.dev)
 	if err != nil {
 		fatal(logger, err)
 	}
 
-	srv := &grpc.Server{
-		Addr:          fmt.Sprintf(":%d", cfg.port),
-		UserService:   &pg.UserService{Pool: pool},
-		RiderService:  &pg.RiderService{Pool: pool},
-		VendorService: &pg.VendorService{Pool: pool},
-	}
-
+	addr := fmt.Sprintf(":%d", cfg.port)
+	srv := grpc.NewServer(addr, pg.DB)
 	err = srv.ListenAndServe()
 	if err != nil {
 		fatal(logger, err)

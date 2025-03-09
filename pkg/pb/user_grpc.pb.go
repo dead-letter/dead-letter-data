@@ -32,11 +32,11 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
-	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*UserResponse, error)
-	ReadUser(ctx context.Context, in *ReadUserRequest, opts ...grpc.CallOption) (*UserResponse, error)
+	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*User, error)
+	ReadUser(ctx context.Context, in *ReadUserRequest, opts ...grpc.CallOption) (*User, error)
 	CheckUserExists(ctx context.Context, in *CheckUserExistsRequest, opts ...grpc.CallOption) (*CheckUserExistsResponse, error)
-	ReadUserWithCredentials(ctx context.Context, in *ReadUserWithCredentialsRequest, opts ...grpc.CallOption) (*UserResponse, error)
-	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*UserResponse, error)
+	ReadUserWithCredentials(ctx context.Context, in *ReadUserWithCredentialsRequest, opts ...grpc.CallOption) (*User, error)
+	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*User, error)
 	DeleteUser(ctx context.Context, in *DeleteUserRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 }
 
@@ -48,9 +48,9 @@ func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
 	return &userServiceClient{cc}
 }
 
-func (c *userServiceClient) CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*UserResponse, error) {
+func (c *userServiceClient) CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*User, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UserResponse)
+	out := new(User)
 	err := c.cc.Invoke(ctx, UserService_CreateUser_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -58,9 +58,9 @@ func (c *userServiceClient) CreateUser(ctx context.Context, in *CreateUserReques
 	return out, nil
 }
 
-func (c *userServiceClient) ReadUser(ctx context.Context, in *ReadUserRequest, opts ...grpc.CallOption) (*UserResponse, error) {
+func (c *userServiceClient) ReadUser(ctx context.Context, in *ReadUserRequest, opts ...grpc.CallOption) (*User, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UserResponse)
+	out := new(User)
 	err := c.cc.Invoke(ctx, UserService_ReadUser_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -78,9 +78,9 @@ func (c *userServiceClient) CheckUserExists(ctx context.Context, in *CheckUserEx
 	return out, nil
 }
 
-func (c *userServiceClient) ReadUserWithCredentials(ctx context.Context, in *ReadUserWithCredentialsRequest, opts ...grpc.CallOption) (*UserResponse, error) {
+func (c *userServiceClient) ReadUserWithCredentials(ctx context.Context, in *ReadUserWithCredentialsRequest, opts ...grpc.CallOption) (*User, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UserResponse)
+	out := new(User)
 	err := c.cc.Invoke(ctx, UserService_ReadUserWithCredentials_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -88,9 +88,9 @@ func (c *userServiceClient) ReadUserWithCredentials(ctx context.Context, in *Rea
 	return out, nil
 }
 
-func (c *userServiceClient) UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*UserResponse, error) {
+func (c *userServiceClient) UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*User, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UserResponse)
+	out := new(User)
 	err := c.cc.Invoke(ctx, UserService_UpdateUser_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -112,11 +112,11 @@ func (c *userServiceClient) DeleteUser(ctx context.Context, in *DeleteUserReques
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility.
 type UserServiceServer interface {
-	CreateUser(context.Context, *CreateUserRequest) (*UserResponse, error)
-	ReadUser(context.Context, *ReadUserRequest) (*UserResponse, error)
+	CreateUser(context.Context, *CreateUserRequest) (*User, error)
+	ReadUser(context.Context, *ReadUserRequest) (*User, error)
 	CheckUserExists(context.Context, *CheckUserExistsRequest) (*CheckUserExistsResponse, error)
-	ReadUserWithCredentials(context.Context, *ReadUserWithCredentialsRequest) (*UserResponse, error)
-	UpdateUser(context.Context, *UpdateUserRequest) (*UserResponse, error)
+	ReadUserWithCredentials(context.Context, *ReadUserWithCredentialsRequest) (*User, error)
+	UpdateUser(context.Context, *UpdateUserRequest) (*User, error)
 	DeleteUser(context.Context, *DeleteUserRequest) (*emptypb.Empty, error)
 	mustEmbedUnimplementedUserServiceServer()
 }
@@ -128,19 +128,19 @@ type UserServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedUserServiceServer struct{}
 
-func (UnimplementedUserServiceServer) CreateUser(context.Context, *CreateUserRequest) (*UserResponse, error) {
+func (UnimplementedUserServiceServer) CreateUser(context.Context, *CreateUserRequest) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
 }
-func (UnimplementedUserServiceServer) ReadUser(context.Context, *ReadUserRequest) (*UserResponse, error) {
+func (UnimplementedUserServiceServer) ReadUser(context.Context, *ReadUserRequest) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadUser not implemented")
 }
 func (UnimplementedUserServiceServer) CheckUserExists(context.Context, *CheckUserExistsRequest) (*CheckUserExistsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CheckUserExists not implemented")
 }
-func (UnimplementedUserServiceServer) ReadUserWithCredentials(context.Context, *ReadUserWithCredentialsRequest) (*UserResponse, error) {
+func (UnimplementedUserServiceServer) ReadUserWithCredentials(context.Context, *ReadUserWithCredentialsRequest) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadUserWithCredentials not implemented")
 }
-func (UnimplementedUserServiceServer) UpdateUser(context.Context, *UpdateUserRequest) (*UserResponse, error) {
+func (UnimplementedUserServiceServer) UpdateUser(context.Context, *UpdateUserRequest) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateUser not implemented")
 }
 func (UnimplementedUserServiceServer) DeleteUser(context.Context, *DeleteUserRequest) (*emptypb.Empty, error) {

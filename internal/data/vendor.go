@@ -6,7 +6,7 @@ import (
 	"github.com/dead-letter/dead-letter-data/internal/uuid"
 )
 
-type VendorService interface {
+type VendorRepository interface {
 	Create(ctx context.Context, id uuid.UUID) (*Vendor, error)
 	Read(ctx context.Context, id uuid.UUID) (*Vendor, error)
 	Update(ctx context.Context, v *Vendor) error

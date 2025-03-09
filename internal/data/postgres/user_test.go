@@ -1,4 +1,4 @@
-package pg
+package postgres
 
 import (
 	"context"
@@ -11,12 +11,10 @@ import (
 
 func TestUserService(t *testing.T) {
 	t.Parallel()
-	pool := testPool(t)
-	defer pool.Close()
+	db := testDB(t)
+	defer db.Close()
 
-	us := &UserService{pool}
 	ctx := context.Background()
-
 	testEmail := "test@email.com"
 	updatedEmail := "updated@gmail.com"
 	newEmail := "new@email.com"
@@ -29,7 +27,7 @@ func TestUserService(t *testing.T) {
 	var err error
 
 	t.Run("TestCreate", func(t *testing.T) {
-		testUser, err = us.Create(ctx, testEmail, validPassword)
+		testUser, err = db.Users.Create(ctx, testEmail, validPassword)
 		assert.NoError(t, err)
 		assert.NotNil(t, testUser)
 		assert.Equal(t, int32(1), testUser.Version)
@@ -37,56 +35,56 @@ func TestUserService(t *testing.T) {
 	})
 
 	t.Run("TestCreateDuplicateEmail", func(t *testing.T) {
-		_, err = us.Create(ctx, testEmail, validPassword)
+		_, err = db.Users.Create(ctx, testEmail, validPassword)
 		assert.ErrorIs(t, err, data.ErrDuplicateEmail)
 	})
 
 	t.Run("TestRead", func(t *testing.T) {
 		var readUser *data.User
-		readUser, err = us.Read(ctx, testUser.ID)
+		readUser, err = db.Users.Read(ctx, testUser.ID)
 		assert.NoError(t, err)
 		assert.NotNil(t, readUser)
 		assert.Equal(t, testUser, readUser)
 	})
 
 	t.Run("TestReadUnkown", func(t *testing.T) {
-		_, err = us.Read(ctx, nonExistantID)
+		_, err = db.Users.Read(ctx, nonExistantID)
 		assert.ErrorIs(t, err, data.ErrRecordNotFound)
 	})
 
 	t.Run("TestExistsWithEmail", func(t *testing.T) {
-		exists, err := us.ExistsWithEmail(ctx, testEmail)
+		exists, err := db.Users.ExistsWithEmail(ctx, testEmail)
 		assert.NoError(t, err)
 		assert.True(t, exists)
 
-		exists, err = us.ExistsWithEmail(ctx, nonExistantEmail)
+		exists, err = db.Users.ExistsWithEmail(ctx, nonExistantEmail)
 		assert.NoError(t, err)
 		assert.False(t, exists)
 	})
 
 	t.Run("TestReadWithCredentials", func(t *testing.T) {
 		var readUser *data.User
-		readUser, err = us.ReadWithCredentials(ctx, testEmail, validPassword)
+		readUser, err = db.Users.ReadWithCredentials(ctx, testEmail, validPassword)
 		assert.NoError(t, err)
 		assert.NotNil(t, readUser)
 		assert.Equal(t, testUser, readUser)
 	})
 
 	t.Run("TestReadWithIncorrectCredentials", func(t *testing.T) {
-		_, err = us.ReadWithCredentials(ctx, testEmail, incorrectPassword)
+		_, err = db.Users.ReadWithCredentials(ctx, testEmail, incorrectPassword)
 		assert.ErrorIs(t, err, data.ErrInvalidCredentials)
 	})
 
 	t.Run("TestUpdate", func(t *testing.T) {
 		testUser.Email = updatedEmail
 		currentVersion := testUser.Version
-		err = us.Update(ctx, testUser)
+		err = db.Users.Update(ctx, testUser)
 		assert.NoError(t, err)
 		assert.NotNil(t, testUser)
 		assert.Equal(t, currentVersion+1, testUser.Version)
 
 		var readUser *data.User
-		readUser, err = us.Read(ctx, testUser.ID)
+		readUser, err = db.Users.Read(ctx, testUser.ID)
 		assert.NoError(t, err)
 		assert.NotNil(t, readUser)
 		assert.Equal(t, testUser, readUser)
@@ -94,29 +92,29 @@ func TestUserService(t *testing.T) {
 
 	t.Run("TestUpdateInvalidVersion", func(t *testing.T) {
 		testUser.Version -= 1
-		err = us.Update(ctx, testUser)
+		err = db.Users.Update(ctx, testUser)
 		assert.ErrorIs(t, err, data.ErrEditConflict)
 	})
 
 	t.Run("TestUpdateDuplicateEmail", func(t *testing.T) {
 		var newUser *data.User
-		newUser, err = us.Create(ctx, newEmail, validPassword)
+		newUser, err = db.Users.Create(ctx, newEmail, validPassword)
 		assert.NoError(t, err)
 		assert.NotNil(t, newUser)
 		assert.Equal(t, newEmail, newUser.Email)
 
 		newUser.Email = testEmail
-		err = us.Update(ctx, testUser)
+		err = db.Users.Update(ctx, testUser)
 		assert.ErrorIs(t, err, data.ErrEditConflict)
 	})
 
 	t.Run("TestDelete", func(t *testing.T) {
-		err = us.Delete(ctx, testUser.ID)
+		err = db.Users.Delete(ctx, testUser.ID)
 		assert.NoError(t, err)
 	})
 
 	t.Run("TestDeleteUnkown", func(t *testing.T) {
-		err = us.Delete(ctx, nonExistantID)
+		err = db.Users.Delete(ctx, nonExistantID)
 		assert.ErrorIs(t, err, data.ErrRecordNotFound)
 	})
 }

@@ -7,7 +7,7 @@ import (
 	"github.com/dead-letter/dead-letter-data/internal/uuid"
 )
 
-type UserService interface {
+type UserRepository interface {
 	Create(ctx context.Context, email string, passwordHash []byte) (*User, error)
 	Read(ctx context.Context, id uuid.UUID) (*User, error)
 	ExistsWithEmail(ctx context.Context, email string) (bool, error)

@@ -28,9 +28,9 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type RiderServiceClient interface {
-	CreateRider(ctx context.Context, in *CreateRiderRequest, opts ...grpc.CallOption) (*RiderResponse, error)
-	ReadRider(ctx context.Context, in *ReadRiderRequest, opts ...grpc.CallOption) (*RiderResponse, error)
-	UpdateRider(ctx context.Context, in *UpdateRiderRequest, opts ...grpc.CallOption) (*RiderResponse, error)
+	CreateRider(ctx context.Context, in *CreateRiderRequest, opts ...grpc.CallOption) (*Rider, error)
+	ReadRider(ctx context.Context, in *ReadRiderRequest, opts ...grpc.CallOption) (*Rider, error)
+	UpdateRider(ctx context.Context, in *UpdateRiderRequest, opts ...grpc.CallOption) (*Rider, error)
 }
 
 type riderServiceClient struct {
@@ -41,9 +41,9 @@ func NewRiderServiceClient(cc grpc.ClientConnInterface) RiderServiceClient {
 	return &riderServiceClient{cc}
 }
 
-func (c *riderServiceClient) CreateRider(ctx context.Context, in *CreateRiderRequest, opts ...grpc.CallOption) (*RiderResponse, error) {
+func (c *riderServiceClient) CreateRider(ctx context.Context, in *CreateRiderRequest, opts ...grpc.CallOption) (*Rider, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(RiderResponse)
+	out := new(Rider)
 	err := c.cc.Invoke(ctx, RiderService_CreateRider_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -51,9 +51,9 @@ func (c *riderServiceClient) CreateRider(ctx context.Context, in *CreateRiderReq
 	return out, nil
 }
 
-func (c *riderServiceClient) ReadRider(ctx context.Context, in *ReadRiderRequest, opts ...grpc.CallOption) (*RiderResponse, error) {
+func (c *riderServiceClient) ReadRider(ctx context.Context, in *ReadRiderRequest, opts ...grpc.CallOption) (*Rider, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(RiderResponse)
+	out := new(Rider)
 	err := c.cc.Invoke(ctx, RiderService_ReadRider_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -61,9 +61,9 @@ func (c *riderServiceClient) ReadRider(ctx context.Context, in *ReadRiderRequest
 	return out, nil
 }
 
-func (c *riderServiceClient) UpdateRider(ctx context.Context, in *UpdateRiderRequest, opts ...grpc.CallOption) (*RiderResponse, error) {
+func (c *riderServiceClient) UpdateRider(ctx context.Context, in *UpdateRiderRequest, opts ...grpc.CallOption) (*Rider, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(RiderResponse)
+	out := new(Rider)
 	err := c.cc.Invoke(ctx, RiderService_UpdateRider_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -75,9 +75,9 @@ func (c *riderServiceClient) UpdateRider(ctx context.Context, in *UpdateRiderReq
 // All implementations must embed UnimplementedRiderServiceServer
 // for forward compatibility.
 type RiderServiceServer interface {
-	CreateRider(context.Context, *CreateRiderRequest) (*RiderResponse, error)
-	ReadRider(context.Context, *ReadRiderRequest) (*RiderResponse, error)
-	UpdateRider(context.Context, *UpdateRiderRequest) (*RiderResponse, error)
+	CreateRider(context.Context, *CreateRiderRequest) (*Rider, error)
+	ReadRider(context.Context, *ReadRiderRequest) (*Rider, error)
+	UpdateRider(context.Context, *UpdateRiderRequest) (*Rider, error)
 	mustEmbedUnimplementedRiderServiceServer()
 }
 
@@ -88,13 +88,13 @@ type RiderServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedRiderServiceServer struct{}
 
-func (UnimplementedRiderServiceServer) CreateRider(context.Context, *CreateRiderRequest) (*RiderResponse, error) {
+func (UnimplementedRiderServiceServer) CreateRider(context.Context, *CreateRiderRequest) (*Rider, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateRider not implemented")
 }
-func (UnimplementedRiderServiceServer) ReadRider(context.Context, *ReadRiderRequest) (*RiderResponse, error) {
+func (UnimplementedRiderServiceServer) ReadRider(context.Context, *ReadRiderRequest) (*Rider, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadRider not implemented")
 }
-func (UnimplementedRiderServiceServer) UpdateRider(context.Context, *UpdateRiderRequest) (*RiderResponse, error) {
+func (UnimplementedRiderServiceServer) UpdateRider(context.Context, *UpdateRiderRequest) (*Rider, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateRider not implemented")
 }
 func (UnimplementedRiderServiceServer) mustEmbedUnimplementedRiderServiceServer() {}

@@ -11,11 +11,11 @@ import (
 
 type RiderServiceServer struct {
 	pb.UnimplementedRiderServiceServer
-	RiderService data.RiderService
+	DB *data.DB
 }
 
-func (s *RiderServiceServer) CreateRider(ctx context.Context, req *pb.CreateRiderRequest) (*pb.RiderResponse, error) {
-	r, err := s.RiderService.Create(ctx, uuid.FromStringOrNil(req.Id))
+func (s *RiderServiceServer) CreateRider(ctx context.Context, req *pb.CreateRiderRequest) (*pb.Rider, error) {
+	r, err := s.DB.Riders.Create(ctx, uuid.FromStringOrNil(req.Id))
 	if err != nil {
 		return nil, err
 	}
@@ -23,8 +23,8 @@ func (s *RiderServiceServer) CreateRider(ctx context.Context, req *pb.CreateRide
 	return pbconv.ProtoFromRider(r), nil
 }
 
-func (s *RiderServiceServer) ReadRiderRequest(ctx context.Context, req *pb.ReadRiderRequest) (*pb.RiderResponse, error) {
-	r, err := s.RiderService.Read(ctx, uuid.FromStringOrNil(req.Id))
+func (s *RiderServiceServer) ReadRiderRequest(ctx context.Context, req *pb.ReadRiderRequest) (*pb.Rider, error) {
+	r, err := s.DB.Riders.Read(ctx, uuid.FromStringOrNil(req.Id))
 	if err != nil {
 		return nil, err
 	}
@@ -32,13 +32,18 @@ func (s *RiderServiceServer) ReadRiderRequest(ctx context.Context, req *pb.ReadR
 	return pbconv.ProtoFromRider(r), nil
 }
 
-func (s *RiderServiceServer) UpdateRider(ctx context.Context, req *pb.UpdateRiderRequest) (*pb.RiderResponse, error) {
-	r, err := pbconv.RiderFromProto(req)
+func (s *RiderServiceServer) UpdateRider(ctx context.Context, req *pb.UpdateRiderRequest) (*pb.Rider, error) {
+	id, err := uuid.FromString(req.Id)
 	if err != nil {
 		return nil, err
 	}
 
-	err = s.RiderService.Update(ctx, r)
+	r := &data.Rider{
+		ID:      id,
+		Version: req.Version,
+	}
+
+	err = s.DB.Riders.Update(ctx, r)
 	if err != nil {
 		return nil, err
 	}

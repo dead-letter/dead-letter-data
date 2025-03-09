@@ -1,4 +1,4 @@
-package pg
+package postgres
 
 import (
 	"bytes"
@@ -12,11 +12,11 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type UserService struct {
+type UserRepository struct {
 	Pool *pgxpool.Pool
 }
 
-func (s *UserService) Create(ctx context.Context, email string, passwordHash []byte) (*data.User, error) {
+func (s *UserRepository) Create(ctx context.Context, email string, passwordHash []byte) (*data.User, error) {
 	u := data.User{
 		Email:        email,
 		PasswordHash: passwordHash,
@@ -46,7 +46,7 @@ func (s *UserService) Create(ctx context.Context, email string, passwordHash []b
 	return &u, nil
 }
 
-func (s *UserService) Read(ctx context.Context, id uuid.UUID) (*data.User, error) {
+func (s *UserRepository) Read(ctx context.Context, id uuid.UUID) (*data.User, error) {
 	var u data.User
 
 	sql := `
@@ -72,7 +72,7 @@ func (s *UserService) Read(ctx context.Context, id uuid.UUID) (*data.User, error
 	return &u, nil
 }
 
-func (s *UserService) ExistsWithEmail(ctx context.Context, email string) (bool, error) {
+func (s *UserRepository) ExistsWithEmail(ctx context.Context, email string) (bool, error) {
 	var exists bool
 
 	sql := `
@@ -95,7 +95,7 @@ func (s *UserService) ExistsWithEmail(ctx context.Context, email string) (bool, 
 	return exists, nil
 }
 
-func (s *UserService) ReadWithCredentials(ctx context.Context, email string, passwordHash []byte) (*data.User, error) {
+func (s *UserRepository) ReadWithCredentials(ctx context.Context, email string, passwordHash []byte) (*data.User, error) {
 	var u data.User
 
 	sql := `
@@ -125,7 +125,7 @@ func (s *UserService) ReadWithCredentials(ctx context.Context, email string, pas
 	return &u, nil
 }
 
-func (s *UserService) Update(ctx context.Context, u *data.User) error {
+func (s *UserRepository) Update(ctx context.Context, u *data.User) error {
 	sql := `
 		UPDATE user_ 
         SET email_ = $1, password_hash_ = $2, version_ = version_ + 1
@@ -156,7 +156,7 @@ func (s *UserService) Update(ctx context.Context, u *data.User) error {
 	return nil
 }
 
-func (s *UserService) Delete(ctx context.Context, id uuid.UUID) error {
+func (s *UserRepository) Delete(ctx context.Context, id uuid.UUID) error {
 	sql := `
 		DELETE FROM user_
 		WHERE id_ = $1;`

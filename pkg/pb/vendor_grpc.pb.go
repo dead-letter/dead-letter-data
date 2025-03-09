@@ -28,9 +28,9 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type VendorServiceClient interface {
-	CreateVendor(ctx context.Context, in *CreateVendorRequest, opts ...grpc.CallOption) (*VendorResponse, error)
-	ReadVendor(ctx context.Context, in *ReadVendorRequest, opts ...grpc.CallOption) (*VendorResponse, error)
-	UpdateVendor(ctx context.Context, in *UpdateVendorRequest, opts ...grpc.CallOption) (*VendorResponse, error)
+	CreateVendor(ctx context.Context, in *CreateVendorRequest, opts ...grpc.CallOption) (*Vendor, error)
+	ReadVendor(ctx context.Context, in *ReadVendorRequest, opts ...grpc.CallOption) (*Vendor, error)
+	UpdateVendor(ctx context.Context, in *UpdateVendorRequest, opts ...grpc.CallOption) (*Vendor, error)
 }
 
 type vendorServiceClient struct {
@@ -41,9 +41,9 @@ func NewVendorServiceClient(cc grpc.ClientConnInterface) VendorServiceClient {
 	return &vendorServiceClient{cc}
 }
 
-func (c *vendorServiceClient) CreateVendor(ctx context.Context, in *CreateVendorRequest, opts ...grpc.CallOption) (*VendorResponse, error) {
+func (c *vendorServiceClient) CreateVendor(ctx context.Context, in *CreateVendorRequest, opts ...grpc.CallOption) (*Vendor, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(VendorResponse)
+	out := new(Vendor)
 	err := c.cc.Invoke(ctx, VendorService_CreateVendor_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -51,9 +51,9 @@ func (c *vendorServiceClient) CreateVendor(ctx context.Context, in *CreateVendor
 	return out, nil
 }
 
-func (c *vendorServiceClient) ReadVendor(ctx context.Context, in *ReadVendorRequest, opts ...grpc.CallOption) (*VendorResponse, error) {
+func (c *vendorServiceClient) ReadVendor(ctx context.Context, in *ReadVendorRequest, opts ...grpc.CallOption) (*Vendor, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(VendorResponse)
+	out := new(Vendor)
 	err := c.cc.Invoke(ctx, VendorService_ReadVendor_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -61,9 +61,9 @@ func (c *vendorServiceClient) ReadVendor(ctx context.Context, in *ReadVendorRequ
 	return out, nil
 }
 
-func (c *vendorServiceClient) UpdateVendor(ctx context.Context, in *UpdateVendorRequest, opts ...grpc.CallOption) (*VendorResponse, error) {
+func (c *vendorServiceClient) UpdateVendor(ctx context.Context, in *UpdateVendorRequest, opts ...grpc.CallOption) (*Vendor, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(VendorResponse)
+	out := new(Vendor)
 	err := c.cc.Invoke(ctx, VendorService_UpdateVendor_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -75,9 +75,9 @@ func (c *vendorServiceClient) UpdateVendor(ctx context.Context, in *UpdateVendor
 // All implementations must embed UnimplementedVendorServiceServer
 // for forward compatibility.
 type VendorServiceServer interface {
-	CreateVendor(context.Context, *CreateVendorRequest) (*VendorResponse, error)
-	ReadVendor(context.Context, *ReadVendorRequest) (*VendorResponse, error)
-	UpdateVendor(context.Context, *UpdateVendorRequest) (*VendorResponse, error)
+	CreateVendor(context.Context, *CreateVendorRequest) (*Vendor, error)
+	ReadVendor(context.Context, *ReadVendorRequest) (*Vendor, error)
+	UpdateVendor(context.Context, *UpdateVendorRequest) (*Vendor, error)
 	mustEmbedUnimplementedVendorServiceServer()
 }
 
@@ -88,13 +88,13 @@ type VendorServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedVendorServiceServer struct{}
 
-func (UnimplementedVendorServiceServer) CreateVendor(context.Context, *CreateVendorRequest) (*VendorResponse, error) {
+func (UnimplementedVendorServiceServer) CreateVendor(context.Context, *CreateVendorRequest) (*Vendor, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateVendor not implemented")
 }
-func (UnimplementedVendorServiceServer) ReadVendor(context.Context, *ReadVendorRequest) (*VendorResponse, error) {
+func (UnimplementedVendorServiceServer) ReadVendor(context.Context, *ReadVendorRequest) (*Vendor, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ReadVendor not implemented")
 }
-func (UnimplementedVendorServiceServer) UpdateVendor(context.Context, *UpdateVendorRequest) (*VendorResponse, error) {
+func (UnimplementedVendorServiceServer) UpdateVendor(context.Context, *UpdateVendorRequest) (*Vendor, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateVendor not implemented")
 }
 func (UnimplementedVendorServiceServer) mustEmbedUnimplementedVendorServiceServer() {}

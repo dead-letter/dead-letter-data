@@ -12,11 +12,11 @@ import (
 
 type UserServiceServer struct {
 	pb.UnimplementedUserServiceServer
-	UserService data.UserService
+	DB *data.DB
 }
 
-func (s *UserServiceServer) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.UserResponse, error) {
-	u, err := s.UserService.Create(ctx, req.Email, req.PasswordHash)
+func (s *UserServiceServer) CreateUser(ctx context.Context, req *pb.CreateUserRequest) (*pb.User, error) {
+	u, err := s.DB.Users.Create(ctx, req.Email, req.PasswordHash)
 	if err != nil {
 		return nil, err
 	}
@@ -24,8 +24,8 @@ func (s *UserServiceServer) CreateUser(ctx context.Context, req *pb.CreateUserRe
 	return pbconv.ProtoFromUser(u), nil
 }
 
-func (s *UserServiceServer) ReadUser(ctx context.Context, req *pb.ReadUserRequest) (*pb.UserResponse, error) {
-	u, err := s.UserService.Read(ctx, uuid.FromStringOrNil(req.Id))
+func (s *UserServiceServer) ReadUser(ctx context.Context, req *pb.ReadUserRequest) (*pb.User, error) {
+	u, err := s.DB.Users.Read(ctx, uuid.FromStringOrNil(req.Id))
 	if err != nil {
 		return nil, err
 	}
@@ -34,7 +34,7 @@ func (s *UserServiceServer) ReadUser(ctx context.Context, req *pb.ReadUserReques
 }
 
 func (s *UserServiceServer) CheckUserExists(ctx context.Context, req *pb.CheckUserExistsRequest) (*pb.CheckUserExistsResponse, error) {
-	exists, err := s.UserService.ExistsWithEmail(ctx, req.Email)
+	exists, err := s.DB.Users.ExistsWithEmail(ctx, req.Email)
 	if err != nil {
 		return nil, err
 	}
@@ -42,8 +42,8 @@ func (s *UserServiceServer) CheckUserExists(ctx context.Context, req *pb.CheckUs
 	return &pb.CheckUserExistsResponse{Exists: exists}, nil
 }
 
-func (s *UserServiceServer) ReadUserWithCredentialsRequest(ctx context.Context, req *pb.ReadUserWithCredentialsRequest) (*pb.UserResponse, error) {
-	u, err := s.UserService.ReadWithCredentials(ctx, req.Email, req.PasswordHash)
+func (s *UserServiceServer) ReadUserWithCredentials(ctx context.Context, req *pb.ReadUserWithCredentialsRequest) (*pb.User, error) {
+	u, err := s.DB.Users.ReadWithCredentials(ctx, req.Email, req.PasswordHash)
 	if err != nil {
 		return nil, err
 	}
@@ -51,13 +51,20 @@ func (s *UserServiceServer) ReadUserWithCredentialsRequest(ctx context.Context, 
 	return pbconv.ProtoFromUser(u), nil
 }
 
-func (s *UserServiceServer) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.UserResponse, error) {
-	u, err := pbconv.UserFromProto(req)
+func (s *UserServiceServer) UpdateUser(ctx context.Context, req *pb.UpdateUserRequest) (*pb.User, error) {
+	id, err := uuid.FromString(req.Id)
 	if err != nil {
 		return nil, err
 	}
 
-	err = s.UserService.Update(ctx, u)
+	u := &data.User{
+		ID:           id,
+		Version:      req.Version,
+		Email:        req.Email,
+		PasswordHash: req.PasswordHash,
+	}
+
+	err = s.DB.Users.Update(ctx, u)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +78,7 @@ func (s *UserServiceServer) DeleteUser(ctx context.Context, req *pb.DeleteUserRe
 		return nil, err
 	}
 
-	err = s.UserService.Delete(ctx, userID)
+	err = s.DB.Users.Delete(ctx, userID)
 	if err != nil {
 		return nil, err
 	}

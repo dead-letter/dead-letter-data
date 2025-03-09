@@ -36,18 +36,18 @@ test: test/check
 	go test -v ./...
 
 
-# proto/check: check for necessary build tools and directories
-.PHONY: proto/check
-proto/check:
+# pb/check: check for necessary build tools and directories
+.PHONY: pb/check
+pb/check:
 	@which protoc > /dev/null || { echo "❌ protoc not found"; exit 1; }
 	@which protoc-gen-go > /dev/null || { echo "❌ protoc-gen-go not found"; exit 1; }
 	@which protoc-gen-go-grpc > /dev/null || { echo "❌ protoc-gen-go-grpc not found"; exit 1; }
 	@[ -d "$(PB_DIR_IN)" ] || { echo "❌ PB_DIR_IN $(PB_DIR_IN) does not exist"; exit 1; }
 
 
-## proto/gen: generate protoc stubs
-.PHONY: proto/gen
-proto/gen: proto/check proto/clean
+## pb/gen: generate gRPC code
+.PHONY: pb/gen
+pb/gen: pb/check pb/clean
 	@mkdir -p $(PB_DIR_OUT)
 	@$(PROTOC) -I $(PB_DIR_IN) \
 			--go_out=$(PB_DIR_OUT) --go_opt=paths=source_relative \
@@ -56,9 +56,9 @@ proto/gen: proto/check proto/clean
 	@echo "✅ Generated gRPC code for protos"
 
 
-## proto/clean: clean generated files
-.PHONY: proto/clean
-proto/clean:
+## pb/clean: clean generated files
+.PHONY: pb/clean
+pb/clean:
 	@rm -f $(PB_DIR_OUT)/*.pb.go
 	@echo "🗑️  Cleaned generated files"
 

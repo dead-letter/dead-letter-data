@@ -11,11 +11,11 @@ import (
 
 type VendorServiceServer struct {
 	pb.UnimplementedVendorServiceServer
-	VendorService data.VendorService
+	DB *data.DB
 }
 
-func (s *VendorServiceServer) CreateVendor(ctx context.Context, req *pb.CreateVendorRequest) (*pb.VendorResponse, error) {
-	v, err := s.VendorService.Create(ctx, uuid.FromStringOrNil(req.Id))
+func (s *VendorServiceServer) CreateVendor(ctx context.Context, req *pb.CreateVendorRequest) (*pb.Vendor, error) {
+	v, err := s.DB.Vendors.Create(ctx, uuid.FromStringOrNil(req.Id))
 	if err != nil {
 		return nil, err
 	}
@@ -23,8 +23,8 @@ func (s *VendorServiceServer) CreateVendor(ctx context.Context, req *pb.CreateVe
 	return pbconv.ProtoFromVendor(v), nil
 }
 
-func (s *VendorServiceServer) ReadVendorRequest(ctx context.Context, req *pb.ReadVendorRequest) (*pb.VendorResponse, error) {
-	v, err := s.VendorService.Read(ctx, uuid.FromStringOrNil(req.Id))
+func (s *VendorServiceServer) ReadVendorRequest(ctx context.Context, req *pb.ReadVendorRequest) (*pb.Vendor, error) {
+	v, err := s.DB.Vendors.Read(ctx, uuid.FromStringOrNil(req.Id))
 	if err != nil {
 		return nil, err
 	}
@@ -32,13 +32,18 @@ func (s *VendorServiceServer) ReadVendorRequest(ctx context.Context, req *pb.Rea
 	return pbconv.ProtoFromVendor(v), nil
 }
 
-func (s *VendorServiceServer) UpdateVendor(ctx context.Context, req *pb.UpdateVendorRequest) (*pb.VendorResponse, error) {
-	v, err := pbconv.VendorFromProto(req)
+func (s *VendorServiceServer) UpdateVendor(ctx context.Context, req *pb.UpdateVendorRequest) (*pb.Vendor, error) {
+	id, err := uuid.FromString(req.Id)
 	if err != nil {
 		return nil, err
 	}
 
-	err = s.VendorService.Update(ctx, v)
+	v := &data.Vendor{
+		ID:      id,
+		Version: req.Version,
+	}
+
+	err = s.DB.Vendors.Update(ctx, v)
 	if err != nil {
 		return nil, err
 	}

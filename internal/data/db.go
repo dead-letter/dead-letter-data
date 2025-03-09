@@ -12,3 +12,9 @@ var (
 	ErrExpiredToken       = errors.New("data: expired token")
 	ErrEditConflict       = errors.New("data: edit conflict")
 )
+
+type DB struct {
+	Users   UserRepository
+	Riders  RiderRepository
+	Vendors VendorRepository
+}

@@ -1,4 +1,4 @@
-package pg
+package postgres
 
 import (
 	"context"
@@ -10,13 +10,10 @@ import (
 
 func TestRiderService(t *testing.T) {
 	t.Parallel()
-	pool := testPool(t)
-	defer pool.Close()
+	db := testDB(t)
+	defer db.Close()
 
-	us := &UserService{pool}
-	rs := &RiderService{pool}
 	ctx := context.Background()
-
 	testEmail := "test@email.com"
 	validPassword := []byte("super_secret_password")
 
@@ -25,7 +22,7 @@ func TestRiderService(t *testing.T) {
 	var err error
 
 	t.Run("TestUserCreate", func(t *testing.T) {
-		testUser, err = us.Create(ctx, testEmail, validPassword)
+		testUser, err = db.Users.Create(ctx, testEmail, validPassword)
 		assert.NoError(t, err)
 		assert.NotNil(t, testUser)
 		assert.Equal(t, int32(1), testUser.Version)
@@ -33,7 +30,7 @@ func TestRiderService(t *testing.T) {
 	})
 
 	t.Run("TestCreate", func(t *testing.T) {
-		testRider, err = rs.Create(ctx, testUser.ID)
+		testRider, err = db.Riders.Create(ctx, testUser.ID)
 		assert.NoError(t, err)
 		assert.NotNil(t, testRider)
 		assert.Equal(t, int32(1), testRider.Version)
@@ -42,7 +39,7 @@ func TestRiderService(t *testing.T) {
 
 	t.Run("TestRead", func(t *testing.T) {
 		var readRider *data.Rider
-		readRider, err = rs.Read(ctx, testRider.ID)
+		readRider, err = db.Riders.Read(ctx, testRider.ID)
 		assert.NoError(t, err)
 		assert.NotNil(t, readRider)
 		assert.Equal(t, testRider, readRider)
@@ -50,23 +47,23 @@ func TestRiderService(t *testing.T) {
 
 	t.Run("TestUpdate", func(t *testing.T) {
 		currentVersion := testRider.Version
-		err = rs.Update(ctx, testRider)
+		err = db.Riders.Update(ctx, testRider)
 		assert.NoError(t, err)
 		assert.NotNil(t, testRider)
 		assert.Equal(t, currentVersion+1, testRider.Version)
 
 		var readRider *data.Rider
-		readRider, err = rs.Read(ctx, testRider.ID)
+		readRider, err = db.Riders.Read(ctx, testRider.ID)
 		assert.NoError(t, err)
 		assert.NotNil(t, readRider)
 		assert.Equal(t, testRider, readRider)
 	})
 
 	t.Run("TestUserDelete", func(t *testing.T) {
-		err = us.Delete(ctx, testRider.ID)
+		err = db.Users.Delete(ctx, testRider.ID)
 		assert.NoError(t, err)
 
-		_, err = rs.Read(ctx, testRider.ID)
+		_, err = db.Riders.Read(ctx, testRider.ID)
 		assert.ErrorIs(t, err, data.ErrRecordNotFound)
 	})
 }

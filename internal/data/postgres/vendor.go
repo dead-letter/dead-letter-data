@@ -1,4 +1,4 @@
-package pg
+package postgres
 
 import (
 	"context"
@@ -11,40 +11,40 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type RiderService struct {
+type VendorRepository struct {
 	Pool *pgxpool.Pool
 }
 
-func (s *RiderService) Create(ctx context.Context, id uuid.UUID) (*data.Rider, error) {
-	r := data.Rider{
+func (s *VendorRepository) Create(ctx context.Context, id uuid.UUID) (*data.Vendor, error) {
+	v := data.Vendor{
 		ID: id,
 	}
 
 	sql := `
-		INSERT INTO rider_ (id_)
+		INSERT INTO vendor_ (id_)
 		VALUES($1)
 		RETURNING version_;`
 
-	err := s.Pool.QueryRow(ctx, sql, r.ID).Scan(
-		&r.Version,
+	err := s.Pool.QueryRow(ctx, sql, v.ID).Scan(
+		&v.Version,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	return &r, nil
+	return &v, nil
 }
 
-func (s *RiderService) Read(ctx context.Context, id uuid.UUID) (*data.Rider, error) {
-	var r data.Rider
+func (s *VendorRepository) Read(ctx context.Context, id uuid.UUID) (*data.Vendor, error) {
+	var v data.Vendor
 
 	sql := `
 		SELECT id_, version_
-		FROM rider_ WHERE id_ = $1;`
+		FROM vendor_ WHERE id_ = $1;`
 
 	err := s.Pool.QueryRow(ctx, sql, id).Scan(
-		&r.ID,
-		&r.Version,
+		&v.ID,
+		&v.Version,
 	)
 	if err != nil {
 		switch {
@@ -55,23 +55,23 @@ func (s *RiderService) Read(ctx context.Context, id uuid.UUID) (*data.Rider, err
 		}
 	}
 
-	return &r, nil
+	return &v, nil
 }
 
-func (s *RiderService) Update(ctx context.Context, r *data.Rider) error {
+func (s *VendorRepository) Update(ctx context.Context, v *data.Vendor) error {
 	sql := `
-		UPDATE rider_ 
+		UPDATE vendor_ 
         SET version_ = version_ + 1
         WHERE id_ = $1 AND version_ = $2
         RETURNING version_;`
 
 	args := []any{
-		r.ID,
-		r.Version,
+		v.ID,
+		v.Version,
 	}
 
 	err := s.Pool.QueryRow(ctx, sql, args...).Scan(
-		&r.Version,
+		&v.Version,
 	)
 	if err != nil {
 		switch {

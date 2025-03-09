@@ -1,16 +1,15 @@
-package pg
+package postgres
 
 import (
 	"testing"
 
 	"github.com/dead-letter/dead-letter-data/migrations"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/peterldowns/pgtestdb"
 	"github.com/peterldowns/pgtestdb/migrators/goosemigrator"
 	"github.com/stretchr/testify/assert"
 )
 
-func testPool(t *testing.T) *pgxpool.Pool {
+func testDB(t *testing.T) *DB {
 	t.Helper()
 	dbconf := pgtestdb.Config{
 		DriverName: "pgx",
@@ -27,8 +26,8 @@ func testPool(t *testing.T) *pgxpool.Pool {
 	c := pgtestdb.Custom(t, dbconf, m)
 	assert.NotEqual(t, dbconf, *c)
 
-	pool, err := OpenPool(c.URL())
+	db, err := NewDB(c.URL())
 	assert.NoError(t, err)
 
-	return pool
+	return db
 }
